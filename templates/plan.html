@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Predbat Plan Frontend</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+    <script>
+      window.__PLAN_DATASETS__ = {{ datasets | tojson }};
+      window.__SELECTED_KEY__ = {{ selected_key | tojson }};
+      window.__SOURCE_URL__ = {{ source_url | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-one"></div>
+    <div class="bg-shape bg-shape-two"></div>
+
+    <main class="layout">
+      <header class="hero">
+        <p class="eyebrow">Predbat Planner</p>
+        <h1>Plan Dashboard</h1>
+        <p class="subtitle">A cleaner view over import/export rates, battery state, solar forecast, load, and cost movement.</p>
+      </header>
+
+      {% if error %}
+        <section class="error-panel">
+          <h2>Data Fetch Error</h2>
+          <p>{{ error }}</p>
+          <p>Source URL: {{ source_url }}</p>
+        </section>
+      {% else %}
+        <section class="toolbar">
+          <div class="tabs" id="tabs"></div>
+          <div class="meta">
+            <p>Source: <a id="sourceLink" href="{{ source_url }}" target="_blank" rel="noreferrer">{{ source_url }}</a></p>
+            <p id="updatedAt"></p>
+            <p><span id="refreshStatus" class="status-badge status-ok">Live</span> <span id="refreshTime"></span></p>
+          </div>
+        </section>
+
+        <section class="cards" id="summaryCards"></section>
+
+        <section class="charts">
+          <article class="panel">
+            <h2>Battery State Of Charge</h2>
+            <canvas id="socChart" aria-label="Battery SoC chart" role="img"></canvas>
+          </article>
+          <article class="panel">
+            <h2>PV Vs Load</h2>
+            <canvas id="energyChart" aria-label="PV and load chart" role="img"></canvas>
+          </article>
+          <article class="panel">
+            <h2>Cost Change Per Slot</h2>
+            <canvas id="costChart" aria-label="Cost delta chart" role="img"></canvas>
+          </article>
+        </section>
+
+        <section class="panel table-wrap">
+          <h2>Timeslot Detail</h2>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Import</th>
+                  <th>Export</th>
+                  <th>State</th>
+                  <th>Limit</th>
+                  <th>PV</th>
+                  <th>Load</th>
+                  <th>SoC</th>
+                  <th>Cost Delta</th>
+                  <th>Total Cost</th>
+                </tr>
+              </thead>
+              <tbody id="planRows"></tbody>
+            </table>
+          </div>
+        </section>
+      {% endif %}
+    </main>
+  </body>
+</html>
