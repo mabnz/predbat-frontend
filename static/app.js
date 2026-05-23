@@ -503,7 +503,7 @@
 
       const grid = gridImportKwh(row);
       const atMinimum = Number.isFinite(soc) && soc <= 5;
-      const lockLabel = atMinimum ? "Min discharge" : "Discharge Lock";
+      const lockLabel = atMinimum ? "Minimum battery level" : "Discharge Lock";
       const lockEmoji = atMinimum ? "🪫" : "🔒";
 
       if (grid !== null && grid > 0.05) {
@@ -532,7 +532,7 @@
         <span class="legend-chip state-discharge" title="Battery discharging to support demand">🔋 Discharging</span>
         <span class="legend-chip state-discharge-grid" title="Battery discharging but grid is also supplementing load">🔋 Battery</span>
         <span class="legend-chip state-demand" title="Battery held at reserve">🔒 Discharge Lock</span>
-        <span class="legend-chip state-demand" title="Battery held at the minimum reserve (5%)">🪫 Min discharge</span>
+        <span class="legend-chip state-demand" title="Battery held at the minimum reserve (5%)">🪫 Minimum battery level</span>
       `;
     }
 
@@ -577,15 +577,13 @@
                 : "load only";
             const title = `Import ${fmt.num(gridKwh)} kWh @ ${fmt.num(importRate)} ${currencyMinor} — ${reason} (load ${fmt.num(load)} − pv ${fmt.num(pv)} + battery ${fmt.num(batteryKwh)} kWh)`;
             gridChargeCell = `<span title="${title}">${fmt.money(costMajor, currencyMajor)}</span>`;
-            const intensity = Math.min(0.45, 0.08 + Math.abs(costMajor) * 0.4);
-            gridCostStyle = ` style="background: rgba(191, 6, 3, ${intensity.toFixed(3)})"`;
+            gridCostStyle = ` style="background: rgba(191, 6, 3, 0.18)"`;
           } else if (gridKwh < -0.01 && Number.isFinite(exportRate) && state.label === "Exporting") {
             const exportKwh = -gridKwh;
             const earningsMajor = (exportKwh * exportRate) / 100;
             const title = `Export ${fmt.num(exportKwh)} kWh @ ${fmt.num(exportRate)} ${currencyMinor} (pv ${fmt.num(pv)} − load ${fmt.num(load)} − battery ${fmt.num(batteryKwh)} kWh)`;
             gridChargeCell = `<span title="${title}">−${fmt.money(earningsMajor, currencyMajor)}</span>`;
-            const intensity = Math.min(0.45, 0.08 + Math.abs(earningsMajor) * 0.4);
-            gridCostStyle = ` style="background: rgba(21, 127, 31, ${intensity.toFixed(3)})"`;
+            gridCostStyle = ` style="background: rgba(21, 127, 31, 0.18)"`;
           }
         }
       }
