@@ -242,6 +242,8 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-left: auto;
+  justify-content: flex-end;
   animation: rise 700ms ease-out both;
 }
 
