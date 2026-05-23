@@ -300,18 +300,25 @@
       const state = classifyState(row);
 
       let gridChargeCell = "-";
-      if (state.label === "Grid Charge" && hasSocMax) {
+      if (hasSocMax) {
         const socChange = Number(row.soc_change);
         const importRate = Number(row.import_rate);
-        if (Number.isFinite(socChange) && socChange > 0 && Number.isFinite(importRate)) {
+        const pv = Number(row.pv_kwh || 0);
+        const load = Number(row.load_kwh || 0);
+        if (Number.isFinite(socChange) && Number.isFinite(importRate)) {
           const batteryKwh = (socChange / 100) * socMax;
-          const pv = Number(row.pv_kwh || 0);
-          const load = Number(row.load_kwh || 0);
-          const loadShortfall = Math.max(0, load - pv);
-          const gridKwh = batteryKwh + loadShortfall;
-          const costMajor = (gridKwh * importRate) / 100;
-          const title = `${fmt.num(gridKwh)} kWh @ ${fmt.num(importRate)} ${currencyMinor} (battery ${fmt.num(batteryKwh)} kWh + load shortfall ${fmt.num(loadShortfall)} kWh)`;
-          gridChargeCell = `<span title="${title}">${fmt.money(costMajor, currencyMajor)}</span>`;
+          const gridKwh = load - pv + batteryKwh;
+          if (gridKwh > 0.01) {
+            const costMajor = (gridKwh * importRate) / 100;
+            const reason =
+              batteryKwh > 0.05
+                ? "battery charge + load"
+                : batteryKwh < -0.05
+                ? "load (offset by battery discharge)"
+                : "load only";
+            const title = `${fmt.num(gridKwh)} kWh @ ${fmt.num(importRate)} ${currencyMinor} — ${reason} (load ${fmt.num(load)} − pv ${fmt.num(pv)} + battery ${fmt.num(batteryKwh)} kWh)`;
+            gridChargeCell = `<span title="${title}">${fmt.money(costMajor, currencyMajor)}</span>`;
+          }
         }
       }
 

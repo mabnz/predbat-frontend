@@ -23,8 +23,8 @@
     <main class="layout">
       <header class="hero">
         <p class="eyebrow">Predbat Planner</p>
-        <h1>Plan Dashboard</h1>
-        <p class="subtitle">A cleaner view over import/export rates, battery state, solar forecast, load, and cost movement.</p>
+        <h1>Dashboard</h1>
+        <p class="subtitle">Your battery, solar, and grid activity in one place.</p>
       </header>
 
       {% if error %}
@@ -67,7 +67,7 @@
         </section>
 
         <section class="panel table-wrap">
-          <h2>Hourly Detail</h2>
+          <h2>Slot Detail</h2>
           <div class="state-legend" id="stateLegend"></div>
           <div class="table-scroll">
             <table>
@@ -81,7 +81,7 @@
                   <th>PV</th>
                   <th>Load</th>
                   <th>SoC</th>
-                  <th>Grid Charge</th>
+                  <th>Grid Cost</th>
                   <th>Cost Delta</th>
                   <th>Total Cost</th>
                 </tr>

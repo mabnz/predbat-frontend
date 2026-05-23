@@ -224,8 +224,7 @@ class PlanDataset:
 
 
 def _make_dataset(key: str, label: str, payload: dict[str, Any]) -> PlanDataset:
-    source_rows: list[dict[str, Any]] = payload.get("rows", [])
-    rows = _aggregate_rows_hourly(source_rows)
+    rows: list[dict[str, Any]] = payload.get("rows", [])
     transformed_rows: list[dict[str, Any]] = []
 
     for row in rows:
