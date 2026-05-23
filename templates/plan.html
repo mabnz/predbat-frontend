@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v={{ version }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
     <script>
       window.__PLAN_DATASETS__ = {{ datasets | tojson }};
@@ -16,7 +16,7 @@
       window.__SOURCE_URL__ = {{ source_url | tojson }};
       window.__REFRESH_INTERVAL_MS__ = {{ refresh_interval_ms | tojson }};
     </script>
-    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='app.js') }}?v={{ version }}" defer></script>
   </head>
   <body>
     <div class="bg-shape bg-shape-one"></div>
@@ -76,7 +76,6 @@
 
         <section class="panel table-wrap" id="tableWrap">
           <h2>Plan detail</h2>
-          <div class="state-legend" id="stateLegend"></div>
           <div class="table-fade table-fade-top" aria-hidden="true"></div>
           <div class="table-fade table-fade-bottom" aria-hidden="true"></div>
           <div class="table-scroll" id="tableScroll">

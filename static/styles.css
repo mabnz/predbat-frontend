@@ -462,6 +462,10 @@ h1 {
   font-size: 18px;
 }
 
+.table-wrap h2 {
+  margin-bottom: 28px;
+}
+
 .chart-shell {
   position: relative;
   width: 100%;
@@ -559,7 +563,7 @@ th,
 td {
   text-align: left;
   white-space: nowrap;
-  padding: 9px 12px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--line);
 }
 

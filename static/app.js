@@ -516,10 +516,10 @@
           importRate >= highImportRate
         ) {
           return {
-            label: "Peak Shaving",
-            emoji: "🪒",
+            label: "Battery",
+            emoji: "🔋",
             className: "state-peak",
-            rule: `Rule: discharging and import_rate (${fmt.num(importRate)}c) >= high_import (${fmt.num(highImportRate)}c) with spread ${fmt.num(importSpread)}c`,
+            rule: `Rule: discharging during peak tariff (import_rate ${fmt.num(importRate)}c >= high_import ${fmt.num(highImportRate)}c, spread ${fmt.num(importSpread)}c)`,
           };
         }
         const grid = gridImportKwh(row);
