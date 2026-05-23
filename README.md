@@ -36,21 +36,19 @@ waitress-serve --listen=0.0.0.0:5053 app:app
 
 ## Configuration
 
-Environment variables:
+This project loads configuration from a `.env` file in the project root.
 
-- `PRED_BAT_PLAN_URL` (default primary: `http://predbat:5052/plan`)
-- `PRED_BAT_PLAN_URLS` (optional comma-separated list, tried in order)
-- `REQUEST_TIMEOUT_SECONDS` (default: `10`)
-
-If `PRED_BAT_PLAN_URLS` is not set, the app tries:
-
-1. `PRED_BAT_PLAN_URL`
-2. `http://localhost:5052/plan`
-3. `http://127.0.0.1:5052/plan`
-
-Example:
+Copy the example template and edit it with your Predbat host:
 
 ```bash
-export PRED_BAT_PLAN_URLS="http://localhost:5052/plan,http://predbat:5052/plan"
-waitress-serve --listen=0.0.0.0:5053 app:app
+cp .env.example .env
+# edit .env and set PRED_BAT_PLAN_URL
 ```
+
+Supported variables:
+
+- `PRED_BAT_PLAN_URL` — required, URL of your Predbat `/plan` page
+- `PRED_BAT_PLAN_URLS` — optional comma-separated fallback list, tried in order
+- `REQUEST_TIMEOUT_SECONDS` — optional, request timeout in seconds (default `10`)
+
+The `.env` file is gitignored.

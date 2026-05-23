@@ -7,9 +7,12 @@ from datetime import datetime
 from typing import Any
 
 import requests
+from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template
 
-PRED_BAT_PLAN_URL = os.getenv("PRED_BAT_PLAN_URL", "http://predbat:5052/plan")
+load_dotenv()
+
+PRED_BAT_PLAN_URL = os.getenv("PRED_BAT_PLAN_URL", "")
 PRED_BAT_PLAN_URLS = os.getenv("PRED_BAT_PLAN_URLS", "")
 REQUEST_TIMEOUT_SECONDS = float(os.getenv("REQUEST_TIMEOUT_SECONDS", "10"))
 
@@ -17,13 +20,13 @@ REQUEST_TIMEOUT_SECONDS = float(os.getenv("REQUEST_TIMEOUT_SECONDS", "10"))
 def _get_plan_urls() -> list[str]:
     if PRED_BAT_PLAN_URLS.strip():
         urls = [u.strip() for u in PRED_BAT_PLAN_URLS.split(",") if u.strip()]
-        return urls or [PRED_BAT_PLAN_URL]
+        if urls:
+            return urls
 
-    return [
-        PRED_BAT_PLAN_URL,
-        "http://localhost:5052/plan",
-        "http://127.0.0.1:5052/plan",
-    ]
+    if PRED_BAT_PLAN_URL.strip():
+        return [PRED_BAT_PLAN_URL.strip()]
+
+    return []
 
 
 def _extract_json_object(source: str, marker: str) -> dict[str, Any] | None:
