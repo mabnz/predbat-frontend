@@ -1,6 +1,6 @@
-# Predbat Plan Frontend
+# Predbat frontend
 
-A Python frontend that fetches only the Predbat `/plan` page, extracts the embedded JSON datasets, and renders a cleaner dashboard UI.
+I wasn't super happy with the UX [Predbat](https://github.com/springfall2008/batpred) presents, so I made my own. This is a Python frontend that fetches only the Predbat `/plan` page, extracts the embedded JSON datasets, and renders a cleaner dashboard UI.
 
 ![Dashboard screenshot](docs/screenshot.png)
 
