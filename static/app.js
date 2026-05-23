@@ -392,6 +392,15 @@
             rule: `Rule: discharging and import_rate (${fmt.num(importRate)}c) >= high_import (${fmt.num(highImportRate)}c) with spread ${fmt.num(importSpread)}c`,
           };
         }
+        const grid = gridImportKwh(row);
+        if (grid !== null && grid > 0.05) {
+          return {
+            label: "Battery",
+            emoji: "🔋",
+            className: "state-discharge-grid",
+            rule: `Rule: discharging and grid import (${fmt.num(grid)} kWh) needed to meet load (load ${fmt.num(load)} − pv ${fmt.num(pv)} kWh exceeds battery output)`,
+          };
+        }
         return {
           label: "Discharging",
           emoji: "🔋",
@@ -400,11 +409,25 @@
         };
       }
 
+      const grid = gridImportKwh(row);
+      const atMinimum = Number.isFinite(soc) && soc <= 5;
+      const lockLabel = atMinimum ? "Min discharge" : "Discharge Lock";
+      const lockEmoji = atMinimum ? "🪫" : "🔒";
+
+      if (grid !== null && grid > 0.05) {
+        return {
+          label: lockLabel,
+          emoji: lockEmoji,
+          className: "state-demand",
+          rule: `Rule: no charge/discharge (battery at ${fmt.num(soc, 0)}%) and grid import (${fmt.num(grid)} kWh) supplying load (load ${fmt.num(load)} − pv ${fmt.num(pv)} kWh)`,
+        };
+      }
+
       return {
-        label: "Demand",
-        emoji: "🏠",
+        label: lockLabel,
+        emoji: lockEmoji,
         className: "state-demand",
-        rule: "Rule: no charge or discharge condition matched",
+        rule: `Rule: no charge or discharge (battery at ${fmt.num(soc, 0)}%), no grid import`,
       };
     }
 
@@ -415,7 +438,10 @@
         <span class="legend-chip state-frozen" title="PV available but charging held near target limit">⏸️ Charge Frozen</span>
         <span class="legend-chip state-export" title="Surplus likely exporting with favorable export context">⬆️ Exporting</span>
         <span class="legend-chip state-discharge" title="Battery discharging to support demand">🔋 Discharging</span>
-        <span class="legend-chip state-demand" title="No active battery movement">🏠 Demand</span>
+        <span class="legend-chip state-discharge-grid" title="Battery discharging but grid is also supplementing load">🔋 Battery</span>
+        <span class="legend-chip state-demand" title="Battery held at reserve">🔒 Discharge Lock</span>
+        <span class="legend-chip state-demand" title="Battery held at the minimum reserve (5%)">🪫 Min discharge</span>
+        <span class="legend-chip legend-grid-icon" title="Tower marker shown when grid is being imported in that slot"><img class="grid-tower-icon" src="/static/img/transmission-tower.avif" alt=""> Grid import</span>
       `;
     }
 
@@ -423,6 +449,16 @@
 
     const socMax = Number(ds.soc_max);
     const hasSocMax = Number.isFinite(socMax) && socMax > 0;
+
+    function gridImportKwh(row) {
+      if (!hasSocMax) return null;
+      const socChange = Number(row.soc_change);
+      const pv = Number(row.pv_kwh || 0);
+      const load = Number(row.load_kwh || 0);
+      if (!Number.isFinite(socChange)) return null;
+      const batteryKwh = (socChange / 100) * socMax;
+      return load - pv + batteryKwh;
+    }
 
     rows.forEach((row) => {
       const tr = document.createElement("tr");
@@ -471,6 +507,12 @@
         socCellStyle = ` style="background: hsla(${hue.toFixed(0)}, 70%, 55%, 0.35)"`;
       }
 
+      const gridForIcon = gridImportKwh(row);
+      const showGridIcon = gridForIcon !== null && gridForIcon > 0.05;
+      const gridIconHtml = showGridIcon
+        ? `<img class="grid-tower-icon" src="/static/img/transmission-tower.avif" alt="" title="Grid importing ${fmt.num(gridForIcon)} kWh">`
+        : "";
+
       tr.innerHTML = `
         <td>${row.time_label}</td>
         <td${tariffStyle(row.import_rate)}>${fmt.num(row.import_rate)} ${currencyMinor}</td>
@@ -478,6 +520,7 @@
         <td>
           <div class="state-cell">
             <span class="state-chip state-single ${state.className}" title="${state.rule}">${state.emoji} ${state.label}</span>
+            ${gridIconHtml}
           </div>
         </td>
         <td>${row.limit || "-"}</td>

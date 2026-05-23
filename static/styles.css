@@ -383,9 +383,25 @@ tr:nth-child(even) td {
 
 .state-cell {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 6px;
   min-width: 180px;
+}
+
+.grid-tower-icon {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  margin-left: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.legend-grid-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .state-chip {
@@ -403,7 +419,8 @@ tr:nth-child(even) td {
   font-size: 11px;
 }
 
-.state-pv-charge {
+.state-pv-charge,
+.state-discharge-grid {
   background: rgba(21, 127, 31, 0.12);
   border-color: rgba(21, 127, 31, 0.3);
   color: #0e6418;
