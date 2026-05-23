@@ -2,6 +2,8 @@
 
 A Python frontend that fetches only the Predbat `/plan` page, extracts the embedded JSON datasets, and renders a cleaner dashboard UI.
 
+![Dashboard screenshot](docs/screenshot.png)
+
 ## What It Includes
 
 - Single-page dashboard for Predbat plan data
