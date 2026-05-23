@@ -777,9 +777,28 @@
     }
   }
 
+  // Table scroll fade indicators
+  const tableWrapEl = document.getElementById("tableWrap");
+  const tableScrollEl = document.getElementById("tableScroll");
+
+  function updateTableFades() {
+    if (!tableWrapEl || !tableScrollEl) return;
+    const { scrollTop, scrollHeight, clientHeight } = tableScrollEl;
+    const hasMoreTop = scrollTop > 2;
+    const hasMoreBottom = scrollTop + clientHeight < scrollHeight - 2;
+    tableWrapEl.classList.toggle("has-fade-top", hasMoreTop);
+    tableWrapEl.classList.toggle("has-fade-bottom", hasMoreBottom);
+  }
+
+  if (tableScrollEl) {
+    tableScrollEl.addEventListener("scroll", updateTableFades, { passive: true });
+    window.addEventListener("resize", updateTableFades);
+  }
+
   render();
   updateSourceLink(activeSourceUrl);
   setRefreshStatus("info", "Starting");
   refreshData();
   setInterval(refreshData, refreshEveryMs);
+  setInterval(updateTableFades, 1000);
 })();
