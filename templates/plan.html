@@ -13,6 +13,7 @@
       window.__PLAN_DATASETS__ = {{ datasets | tojson }};
       window.__SELECTED_KEY__ = {{ selected_key | tojson }};
       window.__SOURCE_URL__ = {{ source_url | tojson }};
+      window.__REFRESH_INTERVAL_MS__ = {{ refresh_interval_ms | tojson }};
     </script>
     <script src="{{ url_for('static', filename='app.js') }}" defer></script>
   </head>

@@ -18,7 +18,8 @@ __version__ = "0.3.0"
 
 PRED_BAT_PLAN_URL = os.getenv("PRED_BAT_PLAN_URL", "")
 PRED_BAT_PLAN_URLS = os.getenv("PRED_BAT_PLAN_URLS", "")
-REQUEST_TIMEOUT_SECONDS = float(os.getenv("REQUEST_TIMEOUT_SECONDS", "10"))
+REQUEST_TIMEOUT_SECONDS = 10
+REFRESH_INTERVAL_SECONDS = float(os.getenv("REFRESH_INTERVAL_SECONDS", "180"))
 
 
 def _get_plan_urls() -> list[str]:
@@ -333,6 +334,7 @@ def plan() -> str:
         selected_key=selected_key,
         error=error,
         version=__version__,
+        refresh_interval_ms=int(REFRESH_INTERVAL_SECONDS * 1000),
     )
 
 

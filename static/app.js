@@ -1,7 +1,9 @@
 (() => {
   const datasets = window.__PLAN_DATASETS__ || {};
   let activeSourceUrl = window.__SOURCE_URL__ || "";
-  const refreshEveryMs = 60000;
+  const refreshEveryMs = Number(window.__REFRESH_INTERVAL_MS__) > 0
+    ? Number(window.__REFRESH_INTERVAL_MS__)
+    : 180000;
   let selectedKey = window.__SELECTED_KEY__;
 
   const tabsEl = document.getElementById("tabs");

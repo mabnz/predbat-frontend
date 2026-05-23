@@ -51,7 +51,7 @@ Supported variables:
 
 - `PRED_BAT_PLAN_URL` — required, URL of your Predbat `/plan` page
 - `PRED_BAT_PLAN_URLS` — optional comma-separated fallback list, tried in order
-- `REQUEST_TIMEOUT_SECONDS` — optional, request timeout in seconds (default `10`)
+- `REFRESH_INTERVAL_SECONDS` — optional, how often the frontend auto-refreshes plan data (default `180`, i.e. 3 minutes)
 
 The `.env` file is gitignored.
 
