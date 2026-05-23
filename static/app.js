@@ -238,24 +238,74 @@
       }
     }
 
+    // Pull today's already-incurred cost from the yesterdayData dataset.
+    // Predbat's "Yesterday" tab includes yesterday + today-so-far (up to "now").
+    let todaySpentSoFar = null;
+    const yesterdayDs = datasets.yesterday;
+    if (yesterdayDs && Array.isArray(yesterdayDs.rows) && rows.length) {
+      const planFirst = new Date(rows[0].time);
+      if (!Number.isNaN(planFirst.getTime())) {
+        const todayKey = planFirst.toDateString();
+        let todayStartTotal = null;
+        let todayEndTotal = null;
+        yesterdayDs.rows.forEach((r) => {
+          const total = Number(r.total_cost);
+          if (!Number.isFinite(total)) return;
+          const d = new Date(r.time);
+          if (Number.isNaN(d.getTime())) return;
+          if (d.toDateString() !== todayKey) return;
+          if (todayStartTotal === null) {
+            // First today row gives us the cumulative offset to subtract.
+            todayStartTotal = total;
+          }
+          todayEndTotal = total;
+        });
+        if (todayStartTotal !== null && todayEndTotal !== null) {
+          // total_cost is cumulative across the whole yesterdayData window,
+          // so the spend just for today = end - (start - first slot delta).
+          // Using inclusive endpoints: include the first today slot's cost too.
+          const firstTodayRow = yesterdayDs.rows.find((r) => {
+            const d = new Date(r.time);
+            return !Number.isNaN(d.getTime()) && d.toDateString() === todayKey;
+          });
+          const firstDelta = Number(firstTodayRow?.cost_change) || 0;
+          todaySpentSoFar = todayEndTotal - todayStartTotal + firstDelta;
+        }
+      }
+    }
+
     const cards = [];
-    cards.push({ label: "Projected Cost Today", value: fmt.money(todayCost ?? totalCost, currencyMajor) });
+    cards.push({
+      label: "Projected Cost<br>Remaining",
+      value: fmt.money(todayCost ?? totalCost, currencyMajor),
+      type: "cost-remaining",
+    });
+    if (todaySpentSoFar !== null) {
+      const totalTodayProjected = (todayCost ?? totalCost ?? 0) + todaySpentSoFar;
+      cards.push({
+        label: "Projected Cost<br>Today",
+        value: fmt.money(totalTodayProjected, currencyMajor),
+        type: "cost-today",
+      });
+    }
     cards.push({
       label: "PV Forecast",
       subLabel: windowLabel,
       value: `${fmt.num(ds.totals?.pv_forecast)} kWh`,
+      type: "pv",
     });
     cards.push({
       label: "Load Forecast",
       subLabel: windowLabel,
       value: `${fmt.num(ds.totals?.load_forecast)} kWh`,
+      type: "load",
     });
 
     summaryCardsEl.innerHTML = "";
 
     cards.forEach((card) => {
       const el = document.createElement("article");
-      el.className = "card";
+      el.className = `card card-${card.type || "default"}`;
       const sub = card.subLabel ? `<span class="card-sub">${card.subLabel}</span>` : "";
       el.innerHTML = `<h3>${card.label}${sub}</h3><p>${card.value}</p>`;
       summaryCardsEl.appendChild(el);

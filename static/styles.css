@@ -236,12 +236,43 @@ h1 {
 }
 
 .card {
+  position: relative;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 8px 14px;
-  min-width: 140px;
+  padding: 10px 14px 12px;
+  min-width: 150px;
   flex: 0 1 auto;
+  border-left-width: 4px;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(18, 38, 58, 0.12);
+}
+
+.card-cost-remaining {
+  border-left-color: #ff7a18;
+  background: rgba(255, 122, 24, 0.07);
+}
+.card-cost-today {
+  border-left-color: #bf0603;
+  background: rgba(191, 6, 3, 0.07);
+}
+.card-pv {
+  border-left-color: #157f1f;
+  background: rgba(21, 127, 31, 0.07);
+}
+.card-load {
+  border-left-color: #007ea7;
+  background: rgba(0, 126, 167, 0.07);
+}
+.card-default {
+  border-left-color: var(--line);
 }
 
 .card h3 {
@@ -251,9 +282,10 @@ h1 {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
+  gap: 2px 8px;
 }
 
 .card h3 .card-sub {
@@ -262,13 +294,23 @@ h1 {
   letter-spacing: 0.04em;
   text-transform: none;
   color: var(--accent-two);
-  margin-left: auto;
+  width: 100%;
+  margin: 0;
+  line-height: 1.1;
 }
 
 .card p {
-  margin: 4px 0 0;
-  font-size: 20px;
+  margin: 12px 0 0;
+  font-size: 22px;
   font-family: "IBM Plex Mono", monospace;
+  font-weight: 500;
+  color: var(--text);
+  margin-top: auto;
+}
+
+.card-cost-remaining,
+.card-cost-today {
+  padding-top: 14px;
 }
 
 .charts {
