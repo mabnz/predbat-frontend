@@ -16,6 +16,49 @@
   const chartsToggleEl = document.getElementById("chartsToggle");
   const chartsContainerEl = document.getElementById("chartsContainer");
 
+  // Dark mode toggle
+  const THEME_KEY = "predbatTheme";
+  const themeToggleEl = document.getElementById("themeToggle");
+  const themeIconEl = themeToggleEl?.querySelector(".theme-toggle-icon");
+
+  function applyTheme(theme) {
+    const isDark = theme === "dark";
+    document.documentElement.classList.toggle("dark-mode", isDark);
+    if (themeIconEl) themeIconEl.textContent = isDark ? "☀️" : "🌙";
+    if (themeToggleEl) {
+      themeToggleEl.setAttribute(
+        "aria-label",
+        isDark ? "Switch to light mode" : "Switch to dark mode"
+      );
+      themeToggleEl.title = isDark ? "Switch to light mode" : "Switch to dark mode";
+    }
+  }
+
+  let storedTheme = null;
+  try {
+    storedTheme = window.localStorage?.getItem(THEME_KEY);
+  } catch (_err) {
+    storedTheme = null;
+  }
+  const prefersDark =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  applyTheme(storedTheme || (prefersDark ? "dark" : "light"));
+
+  if (themeToggleEl) {
+    themeToggleEl.addEventListener("click", () => {
+      const next = document.documentElement.classList.contains("dark-mode")
+        ? "light"
+        : "dark";
+      applyTheme(next);
+      try {
+        window.localStorage?.setItem(THEME_KEY, next);
+      } catch (_err) {
+        // ignore
+      }
+    });
+  }
+
   const CHARTS_HIDDEN_KEY = "predbatChartsHidden";
   let chartsHidden = true;
   try {

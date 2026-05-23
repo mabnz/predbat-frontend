@@ -9,6 +9,37 @@
   --warn: #bf0603;
   --line: rgba(18, 38, 58, 0.15);
   --shadow: 0 12px 32px rgba(18, 38, 58, 0.12);
+  --body-bg-1: rgba(255, 122, 24, 0.24);
+  --body-bg-2: rgba(0, 126, 167, 0.22);
+  --body-bg-3-from: #f4efe6;
+  --body-bg-3-mid: #eef6fb;
+  --body-bg-3-to: #f8f4eb;
+  --thead-bg: #fcefd9;
+  --zebra: rgba(255, 255, 255, 0.35);
+  --tab-bg: #fff;
+  --refresh-disabled-bg: #f3eee5;
+}
+
+html.dark-mode {
+  --bg: #0f1620;
+  --panel: rgba(28, 38, 52, 0.85);
+  --text: #e6edf3;
+  --muted: #93a0b1;
+  --accent: #ff944a;
+  --accent-two: #4cb2d2;
+  --ok: #4caf50;
+  --warn: #e57373;
+  --line: rgba(255, 255, 255, 0.12);
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --body-bg-1: rgba(255, 122, 24, 0.18);
+  --body-bg-2: rgba(0, 126, 167, 0.18);
+  --body-bg-3-from: #0d1320;
+  --body-bg-3-mid: #131c2a;
+  --body-bg-3-to: #0f1925;
+  --thead-bg: #1e2a3a;
+  --zebra: rgba(255, 255, 255, 0.04);
+  --tab-bg: #1e2a3a;
+  --refresh-disabled-bg: #1e2a3a;
 }
 
 * {
@@ -21,9 +52,9 @@ body {
   font-family: "Space Grotesk", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at 10% 10%, rgba(255, 122, 24, 0.24), transparent 30%),
-    radial-gradient(circle at 90% 0%, rgba(0, 126, 167, 0.22), transparent 28%),
-    linear-gradient(140deg, #f4efe6 0%, #eef6fb 48%, #f8f4eb 100%);
+    radial-gradient(circle at 10% 10%, var(--body-bg-1), transparent 30%),
+    radial-gradient(circle at 90% 0%, var(--body-bg-2), transparent 28%),
+    linear-gradient(140deg, var(--body-bg-3-from) 0%, var(--body-bg-3-mid) 48%, var(--body-bg-3-to) 100%);
   padding: 24px;
 }
 
@@ -50,6 +81,35 @@ body {
   background: #4ad9d9;
   left: 10%;
   bottom: 9%;
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 50;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  transition: transform 140ms ease, background 140ms ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-1px) rotate(-10deg);
+}
+
+.theme-toggle-icon {
+  pointer-events: none;
 }
 
 .layout {
@@ -156,7 +216,7 @@ h1 {
 .tab {
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: #fff;
+  background: var(--tab-bg);
   color: var(--text);
   padding: 8px 14px;
   font-weight: 600;
@@ -222,7 +282,7 @@ h1 {
 .refresh-btn {
   margin-left: 8px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--tab-bg);
   color: var(--text);
   border-radius: 999px;
   padding: 3px 10px;
@@ -244,7 +304,7 @@ h1 {
   opacity: 0.75;
   cursor: wait;
   color: var(--muted);
-  background: #f3eee5;
+  background: var(--refresh-disabled-bg);
 }
 
 .charts-toggle {
@@ -417,7 +477,7 @@ table {
 thead th {
   position: sticky;
   top: 0;
-  background: #fcefd9;
+  background: var(--thead-bg);
   z-index: 1;
 }
 
@@ -430,7 +490,7 @@ td {
 }
 
 tr:nth-child(even) td {
-  background: rgba(255, 255, 255, 0.35);
+  background: var(--zebra);
 }
 
 .error-panel {
@@ -533,6 +593,44 @@ tr:nth-child(even) td {
   background: rgba(79, 100, 117, 0.12);
   border-color: rgba(79, 100, 117, 0.26);
   color: #364a58;
+}
+
+html.dark-mode .state-pv-charge,
+html.dark-mode .state-discharge-grid {
+  background: rgba(34, 197, 94, 0.18);
+  border-color: rgba(34, 197, 94, 0.45);
+  color: #86efac;
+}
+
+html.dark-mode .state-grid-charge {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #7dd3fc;
+}
+
+html.dark-mode .state-frozen {
+  background: rgba(148, 163, 184, 0.18);
+  border-color: rgba(148, 163, 184, 0.45);
+  color: #cbd5e1;
+}
+
+html.dark-mode .state-export {
+  background: rgba(251, 146, 60, 0.18);
+  border-color: rgba(251, 146, 60, 0.45);
+  color: #fdba74;
+}
+
+html.dark-mode .state-discharge,
+html.dark-mode .state-peak {
+  background: rgba(248, 113, 113, 0.18);
+  border-color: rgba(248, 113, 113, 0.45);
+  color: #fca5a5;
+}
+
+html.dark-mode .state-demand {
+  background: rgba(148, 163, 184, 0.18);
+  border-color: rgba(148, 163, 184, 0.45);
+  color: #cbd5e1;
 }
 
 .state-legend {
