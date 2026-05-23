@@ -83,6 +83,38 @@ Auth flow:
 - `/auth/logout` clears the session.
 
 
+## Run With Docker
+
+A `Dockerfile` and `docker-compose.yml` are included for containerised
+deployments.
+
+```bash
+cp .env.example .env
+# edit .env (PRED_BAT_PLAN_URL, Google OAuth creds, etc.)
+docker compose up -d
+```
+
+The app listens on port `5053`. Open `http://localhost:5053/plan`.
+
+Notes:
+- If your Predbat instance runs on the **same host** (outside Docker), set
+  `PRED_BAT_PLAN_URL=http://host.docker.internal:5052/plan` in `.env`. The
+  compose file already adds the `host.docker.internal` mapping needed on
+  Linux hosts.
+- If your Predbat instance is in **another container**, point
+  `PRED_BAT_PLAN_URL` at that container's network alias (e.g.
+  `http://predbat:5052/plan`) and put both services on the same Docker
+  network.
+
+Common commands:
+
+```bash
+docker compose logs -f predbat-frontend
+docker compose restart predbat-frontend
+docker compose pull && docker compose up -d   # if using a published image
+```
+
+
 ## Run As A Systemd Service (Ubuntu)
 
 The repo includes a templated unit file and installer script that deploy the

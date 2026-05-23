@@ -631,7 +631,12 @@ tr:nth-child(even) td {
   font-size: 11px;
 }
 
-.state-pv-charge,
+.state-pv-charge {
+  background: rgba(168, 85, 247, 0.35);
+  border-color: #a855f7;
+  color: #4c1d95;
+}
+
 .state-discharge-grid {
   background: rgba(21, 127, 31, 0.12);
   border-color: rgba(21, 127, 31, 0.3);
@@ -669,7 +674,12 @@ tr:nth-child(even) td {
   color: #364a58;
 }
 
-html.dark-mode .state-pv-charge,
+html.dark-mode .state-pv-charge {
+  background: rgba(168, 85, 247, 0.28);
+  border-color: rgba(168, 85, 247, 0.6);
+  color: #d8b4fe;
+}
+
 html.dark-mode .state-discharge-grid {
   background: rgba(34, 197, 94, 0.18);
   border-color: rgba(34, 197, 94, 0.45);

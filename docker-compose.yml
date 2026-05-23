@@ -1,0 +1,16 @@
+services:
+  predbat-frontend:
+    build: .
+    image: predbat-frontend:latest
+    container_name: predbat-frontend
+    restart: unless-stopped
+    ports:
+      - "5053:5053"
+    env_file:
+      - .env
+    # If your predbat instance runs on the Docker host, you can either:
+    #   1. set PRED_BAT_PLAN_URL in .env to http://host.docker.internal:5052/plan
+    #      (Mac/Windows automatic; on Linux add the extra_hosts line below)
+    #   2. or run with network_mode: host (Linux only) and use http://127.0.0.1:5052/plan
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
