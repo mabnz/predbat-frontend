@@ -169,10 +169,30 @@
     const currencyMajor = (ds.currency_symbols || ["$", "c"])[0] || "$";
     const currencyMinor = (ds.currency_symbols || ["$", "c"])[1] || "c";
 
+    let windowLabel = "";
+    if (rows.length >= 2) {
+      const first = new Date(rows[0].time);
+      const last = new Date(rows[rows.length - 1].time);
+      if (!Number.isNaN(first.getTime()) && !Number.isNaN(last.getTime())) {
+        // Add 30 minutes to last slot start so the duration represents the full coverage.
+        const totalMinutes = Math.max(0, (last - first) / 60000 + 30);
+        const totalHours = Math.round(totalMinutes / 60);
+        windowLabel = `${totalHours}H`;
+      }
+    }
+
     const cards = [
       { label: "Projected Total", value: fmt.money(totalCost, currencyMajor) },
-      { label: "PV Forecast", value: `${fmt.num(ds.totals?.pv_forecast)} kWh` },
-      { label: "Load Forecast", value: `${fmt.num(ds.totals?.load_forecast)} kWh` },
+      {
+        label: "PV Forecast",
+        subLabel: windowLabel,
+        value: `${fmt.num(ds.totals?.pv_forecast)} kWh`,
+      },
+      {
+        label: "Load Forecast",
+        subLabel: windowLabel,
+        value: `${fmt.num(ds.totals?.load_forecast)} kWh`,
+      },
     ];
 
     summaryCardsEl.innerHTML = "";
@@ -180,7 +200,8 @@
     cards.forEach((card) => {
       const el = document.createElement("article");
       el.className = "card";
-      el.innerHTML = `<h3>${card.label}</h3><p>${card.value}</p>`;
+      const sub = card.subLabel ? `<span class="card-sub">${card.subLabel}</span>` : "";
+      el.innerHTML = `<h3>${card.label}${sub}</h3><p>${card.value}</p>`;
       summaryCardsEl.appendChild(el);
     });
   }

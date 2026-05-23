@@ -242,6 +242,16 @@ h1 {
   letter-spacing: 0.06em;
 }
 
+.card h3 .card-sub {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--accent-two);
+  margin-top: 2px;
+}
+
 .card p {
   margin: 4px 0 0;
   font-size: 20px;
