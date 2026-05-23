@@ -2,15 +2,18 @@
 # Version: 0.4.0
 from __future__ import annotations
 
+import functools
 import json
 import os
+import secrets
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
 import requests
+from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 
 load_dotenv()
 
@@ -20,6 +23,16 @@ PRED_BAT_PLAN_URL = os.getenv("PRED_BAT_PLAN_URL", "")
 PRED_BAT_PLAN_URLS = os.getenv("PRED_BAT_PLAN_URLS", "")
 REQUEST_TIMEOUT_SECONDS = 10
 REFRESH_INTERVAL_SECONDS = float(os.getenv("REFRESH_INTERVAL_SECONDS", "180"))
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+OAUTH_REDIRECT_BASE_URL = os.getenv("OAUTH_REDIRECT_BASE_URL", "").rstrip("/")
+ALLOWED_EMAILS = {
+    e.strip().lower()
+    for e in os.getenv("ALLOWED_EMAILS", "").split(",")
+    if e.strip()
+}
+SECRET_KEY = os.getenv("SECRET_KEY") or secrets.token_hex(32)
 
 
 def _get_plan_urls() -> list[str]:
@@ -306,10 +319,99 @@ def _fetch_plan_payloads() -> tuple[dict[str, PlanDataset], str | None, str | No
 
 
 app = Flask(__name__)
+app.secret_key = SECRET_KEY
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=OAUTH_REDIRECT_BASE_URL.startswith("https://"),
+)
+
+oauth = OAuth(app)
+oauth.register(
+    name="google",
+    client_id=GOOGLE_CLIENT_ID,
+    client_secret=GOOGLE_CLIENT_SECRET,
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    client_kwargs={"scope": "openid email profile"},
+)
+
+
+def _is_authenticated() -> bool:
+    user = session.get("user") or {}
+    email = (user.get("email") or "").lower()
+    if not email:
+        return False
+    if not ALLOWED_EMAILS:
+        return True
+    return email in ALLOWED_EMAILS
+
+
+def require_auth(view):
+    @functools.wraps(view)
+    def wrapper(*args, **kwargs):
+        if _is_authenticated():
+            return view(*args, **kwargs)
+        if request.path.startswith("/api/"):
+            return jsonify({"error": "unauthorized"}), 401
+        session["next_url"] = request.full_path if request.query_string else request.path
+        return redirect(url_for("auth_login"))
+
+    return wrapper
+
+
+@app.route("/auth/login")
+def auth_login():
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        return (
+            "Google OAuth is not configured. Set GOOGLE_CLIENT_ID and "
+            "GOOGLE_CLIENT_SECRET in the environment.",
+            500,
+        )
+    redirect_uri = url_for("auth_callback", _external=True)
+    if OAUTH_REDIRECT_BASE_URL:
+        redirect_uri = f"{OAUTH_REDIRECT_BASE_URL}{url_for('auth_callback')}"
+    return oauth.google.authorize_redirect(redirect_uri)
+
+
+@app.route("/auth/callback")
+def auth_callback():
+    try:
+        token = oauth.google.authorize_access_token()
+    except Exception as exc:  # noqa: BLE001
+        return f"Authentication failed: {exc}", 400
+
+    user_info = token.get("userinfo") or {}
+    if not user_info:
+        # Fallback for older flows
+        try:
+            user_info = oauth.google.parse_id_token(token)
+        except Exception:  # noqa: BLE001
+            user_info = {}
+
+    email = (user_info.get("email") or "").lower()
+    if not email:
+        return "Authentication failed: no email returned.", 400
+    if ALLOWED_EMAILS and email not in ALLOWED_EMAILS:
+        return f"Access denied for {email}.", 403
+
+    session["user"] = {
+        "email": email,
+        "name": user_info.get("name"),
+        "picture": user_info.get("picture"),
+    }
+    next_url = session.pop("next_url", None) or url_for("plan")
+    return redirect(next_url)
+
+
+@app.route("/auth/logout")
+def auth_logout():
+    session.clear()
+    return redirect(url_for("plan"))
 
 
 @app.route("/")
 @app.route("/plan")
+@require_auth
 def plan() -> str:
     datasets, error, source_url = _fetch_plan_payloads()
     selected_key = "plan" if "plan" in datasets else next(iter(datasets.keys()), "")
@@ -341,6 +443,7 @@ def plan() -> str:
 
 
 @app.route("/api/plan-data")
+@require_auth
 def plan_data_api() -> Any:
     datasets, error, source_url = _fetch_plan_payloads()
     selected_key = "plan" if "plan" in datasets else next(iter(datasets.keys()), "")

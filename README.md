@@ -52,8 +52,34 @@ Supported variables:
 - `PRED_BAT_PLAN_URL` — required, URL of your Predbat `/plan` page
 - `PRED_BAT_PLAN_URLS` — optional comma-separated fallback list, tried in order
 - `REFRESH_INTERVAL_SECONDS` — optional, how often the frontend auto-refreshes plan data (default `180`, i.e. 3 minutes)
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google OAuth credentials (see below)
+- `OAUTH_REDIRECT_BASE_URL` — public base URL of the app (e.g. `https://predbat.example.com`)
+- `ALLOWED_EMAILS` — comma-separated allowlist of Google account emails permitted to sign in
+- `SECRET_KEY` — random string used to sign session cookies (generate with `python -c "import secrets; print(secrets.token_hex(32))"`)
 
 The `.env` file is gitignored.
+
+## Google OAuth Setup
+
+The `/plan` page and `/api/plan-data` endpoint require an authenticated Google
+user whose email is in `ALLOWED_EMAILS`.
+
+1. Open [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials).
+2. Create an **OAuth 2.0 Client ID** (Application type: *Web application*).
+3. Add an **Authorized redirect URI**: `<OAUTH_REDIRECT_BASE_URL>/auth/callback`
+   (e.g. `https://predbat.example.com/auth/callback`).
+4. Copy the **Client ID** and **Client secret** into `.env`.
+5. Set `OAUTH_REDIRECT_BASE_URL` to the exact public URL of your deployment.
+6. Set `ALLOWED_EMAILS` to a comma-separated list of emails permitted to log in.
+7. Generate and set `SECRET_KEY`.
+8. Restart the service.
+
+Auth flow:
+
+- Unauthenticated requests to `/plan` are redirected to `/auth/login`.
+- Unauthenticated requests to `/api/plan-data` get `401 unauthorized`.
+- `/auth/logout` clears the session.
+
 
 ## Run As A Systemd Service (Ubuntu)
 
