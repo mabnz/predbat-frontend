@@ -1,5 +1,5 @@
 # Predbat Frontend
-# Version: 0.1.0
+# Version: 0.2.0
 from __future__ import annotations
 
 import json
@@ -14,7 +14,7 @@ from flask import Flask, jsonify, render_template
 
 load_dotenv()
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 PRED_BAT_PLAN_URL = os.getenv("PRED_BAT_PLAN_URL", "")
 PRED_BAT_PLAN_URLS = os.getenv("PRED_BAT_PLAN_URLS", "")
