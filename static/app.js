@@ -157,10 +157,10 @@
     }
     const dt = new Date(raw);
     if (Number.isNaN(dt.getTime())) {
-      refreshTimeEl.textContent = `Last update ${raw}`;
+      refreshTimeEl.textContent = `Plan last updated ${raw}`;
       return;
     }
-    refreshTimeEl.textContent = `Last update ${dt
+    refreshTimeEl.textContent = `Plan last updated ${dt
       .toLocaleString(undefined, {
         year: "numeric",
         month: "short",
