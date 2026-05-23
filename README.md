@@ -52,3 +52,40 @@ Supported variables:
 - `REQUEST_TIMEOUT_SECONDS` — optional, request timeout in seconds (default `10`)
 
 The `.env` file is gitignored.
+
+## Run As A Systemd Service (Ubuntu)
+
+The repo includes a templated unit file and installer script that deploy the
+app to `/opt/predbat-frontend` and run it under your user account.
+
+```bash
+sudo ./scripts/install-service.sh           # installs as predbat-frontend@$USER
+# or specify a different user:
+sudo ./scripts/install-service.sh myuser
+```
+
+The installer will:
+
+1. Copy the source tree to `/opt/predbat-frontend`.
+2. Create `.env` from `.env.example` if not already present (edit before starting!).
+3. Create a Python virtual environment and install requirements.
+4. Install the systemd unit at `/etc/systemd/system/predbat-frontend@.service`.
+5. Enable and start `predbat-frontend@<user>.service`.
+
+Useful commands:
+
+```bash
+systemctl status predbat-frontend@$USER.service
+journalctl -u predbat-frontend@$USER.service -f
+sudo systemctl restart predbat-frontend@$USER.service
+```
+
+To uninstall:
+
+```bash
+sudo ./scripts/uninstall-service.sh
+```
+
+The default port is `5053`. To change it, edit the `ExecStart` line in
+`/etc/systemd/system/predbat-frontend@.service` and run
+`sudo systemctl daemon-reload && sudo systemctl restart predbat-frontend@$USER.service`.

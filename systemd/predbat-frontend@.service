@@ -1,0 +1,26 @@
+[Unit]
+Description=Predbat Frontend (Plan dashboard)
+Documentation=https://github.com/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=%i
+Group=%i
+WorkingDirectory=/opt/predbat-frontend
+EnvironmentFile=/opt/predbat-frontend/.env
+ExecStart=/opt/predbat-frontend/.venv/bin/waitress-serve --listen=0.0.0.0:5053 app:app
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Hardening (relax if you need wider access)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
