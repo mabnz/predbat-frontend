@@ -39,31 +39,40 @@
           <div class="meta">
             <p>Source: <a id="sourceLink" href="{{ source_url }}" target="_blank" rel="noreferrer">{{ source_url }}</a></p>
             <p id="updatedAt"></p>
-            <p><span id="refreshStatus" class="status-badge status-ok">Live</span> <span id="refreshTime"></span></p>
+            <p>
+              <span id="refreshStatus" class="status-badge status-ok">Live</span>
+              <span id="refreshTime"></span>
+              <button type="button" id="refreshNow" class="refresh-btn">Update Now</button>
+            </p>
           </div>
+          <div class="cards" id="summaryCards"></div>
         </section>
 
-        <section class="cards" id="summaryCards"></section>
-
-        <section class="charts">
-          <article class="panel">
-            <h2>Battery State Of Charge</h2>
-            <div class="chart-shell">
-              <canvas id="socChart" aria-label="Battery SoC chart" role="img"></canvas>
-            </div>
-          </article>
-          <article class="panel">
-            <h2>PV Vs Load</h2>
-            <div class="chart-shell">
-              <canvas id="energyChart" aria-label="PV and load chart" role="img"></canvas>
-            </div>
-          </article>
-          <article class="panel">
-            <h2>Cost Change Per Slot</h2>
-            <div class="chart-shell">
-              <canvas id="costChart" aria-label="Cost delta chart" role="img"></canvas>
-            </div>
-          </article>
+        <section class="charts-section">
+          <div class="charts-header">
+            <h2>Charts</h2>
+            <button type="button" id="chartsToggle" class="refresh-btn charts-toggle" aria-expanded="true" aria-label="Toggle charts">▲</button>
+          </div>
+          <div class="charts" id="chartsContainer">
+            <article class="panel">
+              <h2>Battery State Of Charge</h2>
+              <div class="chart-shell">
+                <canvas id="socChart" aria-label="Battery SoC chart" role="img"></canvas>
+              </div>
+            </article>
+            <article class="panel">
+              <h2>PV Vs Load</h2>
+              <div class="chart-shell">
+                <canvas id="energyChart" aria-label="PV and load chart" role="img"></canvas>
+              </div>
+            </article>
+            <article class="panel">
+              <h2>Cost Change Per Slot</h2>
+              <div class="chart-shell">
+                <canvas id="costChart" aria-label="Cost delta chart" role="img"></canvas>
+              </div>
+            </article>
+          </div>
         </section>
 
         <section class="panel table-wrap">
@@ -81,8 +90,7 @@
                   <th>PV</th>
                   <th>Load</th>
                   <th>SoC</th>
-                  <th>Grid Cost</th>
-                  <th>Cost Delta</th>
+                  <th>Cost</th>
                   <th>Total Cost</th>
                 </tr>
               </thead>

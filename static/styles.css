@@ -128,12 +128,31 @@ h1 {
 }
 
 .meta {
-  font-size: 14px;
+  font-size: 11px;
   color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 8px 14px;
+  min-width: 0;
+  flex: 0 1 auto;
+  max-width: 320px;
 }
 
 .meta p {
   margin: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta a {
+  color: var(--accent-two);
+  text-decoration: none;
+}
+
+.meta a:hover {
+  text-decoration: underline;
 }
 
 .status-badge {
@@ -162,10 +181,47 @@ h1 {
   color: #045f7c;
 }
 
+.refresh-btn {
+  margin-left: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff7a18, #ffba66);
+  color: #fff;
+  border-color: transparent;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.charts-toggle {
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .cards {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   animation: rise 700ms ease-out both;
 }
 
@@ -173,18 +229,22 @@ h1 {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 12px 14px;
+  padding: 8px 14px;
+  min-width: 140px;
+  flex: 0 1 auto;
 }
 
 .card h3 {
   margin: 0;
-  font-size: 13px;
+  font-size: 11px;
   color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .card p {
-  margin: 8px 0 0;
-  font-size: 26px;
+  margin: 4px 0 0;
+  font-size: 20px;
   font-family: "IBM Plex Mono", monospace;
 }
 
@@ -192,6 +252,26 @@ h1 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+}
+
+.charts-section {
+  display: grid;
+  gap: 10px;
+}
+
+.charts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.charts-header h2 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .panel {
@@ -221,7 +301,7 @@ canvas {
 }
 
 .table-scroll {
-  max-height: 480px;
+  max-height: 80vh;
   overflow: auto;
   border-top: 1px solid var(--line);
 }
@@ -352,10 +432,6 @@ tr:nth-child(even) td {
 }
 
 @media (max-width: 1080px) {
-  .cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .charts {
     grid-template-columns: 1fr;
   }
@@ -366,8 +442,9 @@ tr:nth-child(even) td {
     padding: 12px;
   }
 
-  .cards {
-    grid-template-columns: 1fr;
+  .card {
+    flex: 1 1 calc(50% - 5px);
+    min-width: 0;
   }
 
   .hero,

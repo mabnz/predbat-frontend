@@ -11,7 +11,46 @@
   const sourceLinkEl = document.getElementById("sourceLink");
   const refreshStatusEl = document.getElementById("refreshStatus");
   const refreshTimeEl = document.getElementById("refreshTime");
+  const refreshNowEl = document.getElementById("refreshNow");
   const stateLegendEl = document.getElementById("stateLegend");
+  const chartsToggleEl = document.getElementById("chartsToggle");
+  const chartsContainerEl = document.getElementById("chartsContainer");
+
+  const CHARTS_HIDDEN_KEY = "predbatChartsHidden";
+  let chartsHidden = false;
+  try {
+    chartsHidden = window.localStorage?.getItem(CHARTS_HIDDEN_KEY) === "1";
+  } catch (_err) {
+    chartsHidden = false;
+  }
+
+  function applyChartsVisibility() {
+    if (!chartsContainerEl || !chartsToggleEl) {
+      return;
+    }
+    chartsContainerEl.style.display = chartsHidden ? "none" : "";
+    chartsToggleEl.textContent = chartsHidden ? "▼" : "▲";
+    chartsToggleEl.setAttribute("aria-expanded", chartsHidden ? "false" : "true");
+  }
+
+  if (chartsToggleEl) {
+    chartsToggleEl.addEventListener("click", () => {
+      chartsHidden = !chartsHidden;
+      try {
+        window.localStorage?.setItem(CHARTS_HIDDEN_KEY, chartsHidden ? "1" : "0");
+      } catch (_err) {
+        // ignore storage errors
+      }
+      applyChartsVisibility();
+      if (!chartsHidden) {
+        const ds = datasets[selectedKey];
+        if (ds) {
+          renderCharts(ds);
+        }
+      }
+    });
+  }
+  applyChartsVisibility();
 
   const charts = {
     soc: null,
@@ -92,12 +131,18 @@
   }
 
   function setActiveTab() {
-    const keys = datasetKeys();
+    const keys = datasetKeys().filter((key) => key === "plan");
     if (!keys.includes(selectedKey)) {
       selectedKey = keys[0] || "";
     }
 
     tabsEl.innerHTML = "";
+
+    if (keys.length <= 1) {
+      tabsEl.style.display = "none";
+      return;
+    }
+    tabsEl.style.display = "";
 
     keys.forEach((key) => {
       const ds = datasets[key];
@@ -127,13 +172,8 @@
 
     const cards = [
       { label: "Projected Total", value: fmt.money(totalCost, currencyMajor) },
-      { label: "Final SoC", value: `${fmt.num(ds.final_soc, 0)}%` },
-      { label: "Min SoC", value: `${fmt.num(minSoc, 0)}%` },
-      { label: "Max SoC", value: `${fmt.num(maxSoc, 0)}%` },
       { label: "PV Forecast", value: `${fmt.num(ds.totals?.pv_forecast)} kWh` },
       { label: "Load Forecast", value: `${fmt.num(ds.totals?.load_forecast)} kWh` },
-      { label: "Import Rate", value: `${fmt.num(rows[0]?.import_rate)} ${currencyMinor}` },
-      { label: "Export Rate", value: `${fmt.num(rows[0]?.export_rate)} ${currencyMinor}` },
     ];
 
     summaryCardsEl.innerHTML = "";
@@ -157,6 +197,38 @@
     const exportRates = rows
       .map((r) => Number(r.export_rate))
       .filter((v) => Number.isFinite(v));
+
+    const allTariffs = new Set();
+    rows.forEach((r) => {
+      const ir = Number(r.import_rate);
+      const er = Number(r.export_rate);
+      if (Number.isFinite(ir)) allTariffs.add(ir.toFixed(2));
+      if (Number.isFinite(er)) allTariffs.add(er.toFixed(2));
+    });
+    const sortedTariffs = [...allTariffs].sort((a, b) => parseFloat(a) - parseFloat(b));
+    const tariffColors = {};
+    const totalTariffs = sortedTariffs.length || 1;
+    // Restricted to blue → purple hues only (200–280) so tariff colors are
+    // visually distinct from any red/green warmth used elsewhere.
+    const HUE_START = 200;
+    const HUE_END = 280;
+    sortedTariffs.forEach((rate, idx) => {
+      const hue =
+        totalTariffs > 1
+          ? Math.round(HUE_START + (idx * (HUE_END - HUE_START)) / (totalTariffs - 1))
+          : Math.round((HUE_START + HUE_END) / 2);
+      // Alternate lightness slightly to improve discrimination when many tariffs.
+      const lightness = idx % 2 === 0 ? 72 : 62;
+      tariffColors[rate] = `hsla(${hue}, 60%, ${lightness}%, 0.55)`;
+    });
+
+    function tariffStyle(value) {
+      if (!Number.isFinite(Number(value))) return "";
+      const key = Number(value).toFixed(2);
+      const color = tariffColors[key];
+      return color ? ` style="background: ${color}"` : "";
+    }
+
     const lowImportRate = importRates.length ? Math.min(...importRates) + 1.0 : null;
     const minImportRate = importRates.length ? Math.min(...importRates) : null;
     const maxImportRate = importRates.length ? Math.max(...importRates) : null;
@@ -296,19 +368,21 @@
 
     rows.forEach((row) => {
       const tr = document.createElement("tr");
-      const deltaClass = Number(row.cost_change) < 0 ? "down" : "up";
       const state = classifyState(row);
 
       let gridChargeCell = "-";
+      let gridCostStyle = "";
       if (hasSocMax) {
         const socChange = Number(row.soc_change);
         const importRate = Number(row.import_rate);
+        const exportRate = Number(row.export_rate);
         const pv = Number(row.pv_kwh || 0);
         const load = Number(row.load_kwh || 0);
-        if (Number.isFinite(socChange) && Number.isFinite(importRate)) {
+        if (Number.isFinite(socChange)) {
           const batteryKwh = (socChange / 100) * socMax;
           const gridKwh = load - pv + batteryKwh;
-          if (gridKwh > 0.01) {
+
+          if (gridKwh > 0.01 && Number.isFinite(importRate)) {
             const costMajor = (gridKwh * importRate) / 100;
             const reason =
               batteryKwh > 0.05
@@ -316,16 +390,33 @@
                 : batteryKwh < -0.05
                 ? "load (offset by battery discharge)"
                 : "load only";
-            const title = `${fmt.num(gridKwh)} kWh @ ${fmt.num(importRate)} ${currencyMinor} — ${reason} (load ${fmt.num(load)} − pv ${fmt.num(pv)} + battery ${fmt.num(batteryKwh)} kWh)`;
+            const title = `Import ${fmt.num(gridKwh)} kWh @ ${fmt.num(importRate)} ${currencyMinor} — ${reason} (load ${fmt.num(load)} − pv ${fmt.num(pv)} + battery ${fmt.num(batteryKwh)} kWh)`;
             gridChargeCell = `<span title="${title}">${fmt.money(costMajor, currencyMajor)}</span>`;
+            const intensity = Math.min(0.45, 0.08 + Math.abs(costMajor) * 0.4);
+            gridCostStyle = ` style="background: rgba(191, 6, 3, ${intensity.toFixed(3)})"`;
+          } else if (gridKwh < -0.01 && Number.isFinite(exportRate) && state.label === "Exporting") {
+            const exportKwh = -gridKwh;
+            const earningsMajor = (exportKwh * exportRate) / 100;
+            const title = `Export ${fmt.num(exportKwh)} kWh @ ${fmt.num(exportRate)} ${currencyMinor} (pv ${fmt.num(pv)} − load ${fmt.num(load)} − battery ${fmt.num(batteryKwh)} kWh)`;
+            gridChargeCell = `<span title="${title}">−${fmt.money(earningsMajor, currencyMajor)}</span>`;
+            const intensity = Math.min(0.45, 0.08 + Math.abs(earningsMajor) * 0.4);
+            gridCostStyle = ` style="background: rgba(21, 127, 31, ${intensity.toFixed(3)})"`;
           }
         }
       }
 
+      let socCellStyle = "";
+      const socPct = Number(row.soc);
+      if (Number.isFinite(socPct)) {
+        const clamped = Math.max(0, Math.min(100, socPct));
+        const hue = clamped * 1.2; // 0 (red) → 120 (green)
+        socCellStyle = ` style="background: hsla(${hue.toFixed(0)}, 70%, 55%, 0.35)"`;
+      }
+
       tr.innerHTML = `
         <td>${row.time_label}</td>
-        <td>${fmt.num(row.import_rate)} ${currencyMinor}</td>
-        <td>${fmt.num(row.export_rate)} ${currencyMinor}</td>
+        <td${tariffStyle(row.import_rate)}>${fmt.num(row.import_rate)} ${currencyMinor}</td>
+        <td${tariffStyle(row.export_rate)}>${fmt.num(row.export_rate)} ${currencyMinor}</td>
         <td>
           <div class="state-cell">
             <span class="state-chip state-single ${state.className}" title="${state.rule}">${state.emoji} ${state.label}</span>
@@ -334,9 +425,8 @@
         <td>${row.limit || "-"}</td>
         <td>${fmt.num(row.pv_kwh)} kWh</td>
         <td>${fmt.num(row.load_kwh)} kWh</td>
-        <td>${fmt.num(row.soc, 0)}%</td>
-        <td>${gridChargeCell}</td>
-        <td class="${deltaClass}">${fmt.signedMinor(row.cost_change, currencyMinor)}</td>
+        <td${socCellStyle}>${fmt.num(row.soc, 0)}%</td>
+        <td class="grid-cost-cell"${gridCostStyle}>${gridChargeCell}</td>
         <td>${fmt.money(row.total_cost, currencyMajor)}</td>
       `;
       planRowsEl.appendChild(tr);
@@ -344,6 +434,9 @@
   }
 
   function renderCharts(ds) {
+    if (chartsHidden) {
+      return;
+    }
     const rows = ds.rows || [];
     const labels = rows.map((r) => r.time_label);
     const socs = rows.map((r) => r.soc);
@@ -473,6 +566,9 @@
       return;
     }
     refreshInFlight = true;
+    if (refreshNowEl) {
+      refreshNowEl.disabled = true;
+    }
 
     try {
       const response = await fetch("/api/plan-data", {
@@ -508,7 +604,17 @@
       setRefreshStatus("warn", "Offline");
     } finally {
       refreshInFlight = false;
+      if (refreshNowEl) {
+        refreshNowEl.disabled = false;
+      }
     }
+  }
+
+  if (refreshNowEl) {
+    refreshNowEl.addEventListener("click", () => {
+      setRefreshStatus("info", "Updating");
+      refreshData();
+    });
   }
 
   render();
