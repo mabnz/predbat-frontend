@@ -27,6 +27,10 @@
           <p class="eyebrow">Predbat Planner</p>
           <p class="eyebrow eyebrow-version">v{{ version }}</p>
         </div>
+        <div class="hero-status">
+          <span id="refreshStatus" class="status-badge status-ok">Live</span>
+          <span id="refreshTime"></span>
+        </div>
         <h1>Dashboard</h1>
         <p class="subtitle">Your battery, solar, and grid activity in one place.</p>
       </header>
@@ -40,12 +44,6 @@
       {% else %}
         <section class="toolbar">
           <div class="tabs" id="tabs"></div>
-          <div class="meta">
-            <p>
-              <span id="refreshStatus" class="status-badge status-ok">Live</span>
-              <span id="refreshTime"></span>
-            </p>
-          </div>
           <div class="cards" id="summaryCards"></div>
         </section>
 
