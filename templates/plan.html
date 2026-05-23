@@ -35,6 +35,12 @@
           <span id="refreshStatus" class="status-badge status-ok">Live</span>
           <span id="refreshTime"></span>
         </div>
+        {% if current_user and current_user.email %}
+          <div class="hero-user">
+            {{ current_user.email }}
+            <a href="{{ url_for('auth_logout') }}" class="hero-user-logout">Sign out</a>
+          </div>
+        {% endif %}
         <h1>Dashboard</h1>
         <p class="subtitle">Your battery, solar, and grid activity in one place.</p>
       </header>

@@ -439,6 +439,7 @@ def plan() -> str:
         error=error,
         version=__version__,
         refresh_interval_ms=int(REFRESH_INTERVAL_SECONDS * 1000),
+        current_user=session.get("user"),
     )
 
 

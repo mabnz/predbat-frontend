@@ -157,6 +157,26 @@ body {
   color: var(--muted);
 }
 
+.hero-user {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.hero-user-logout {
+  color: var(--accent-two);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.hero-user-logout:hover {
+  text-decoration: underline;
+}
+
 .hero-battery {
   display: flex;
   justify-content: flex-start;
