@@ -56,6 +56,8 @@ Supported variables:
 - `OAUTH_REDIRECT_BASE_URL` — public base URL of the app (e.g. `https://predbat.example.com`)
 - `ALLOWED_EMAILS` — comma-separated allowlist of Google account emails permitted to sign in
 - `SECRET_KEY` — random string used to sign session cookies (generate with `python -c "import secrets; print(secrets.token_hex(32))"`)
+- `DEV_BYPASS_AUTH` — local development only; when `true`, skips Google OAuth but **only** if the request comes from `127.0.0.1`/`::1`. Never enable on a public deployment.
+- `DEV_USER_EMAIL` — optional email shown for the bypass dev user (default `dev@localhost`).
 
 The `.env` file is gitignored.
 

@@ -33,6 +33,8 @@ ALLOWED_EMAILS = {
     if e.strip()
 }
 SECRET_KEY = os.getenv("SECRET_KEY") or secrets.token_hex(32)
+DEV_BYPASS_AUTH = os.getenv("DEV_BYPASS_AUTH", "").lower() in ("1", "true", "yes")
+DEV_USER_EMAIL = os.getenv("DEV_USER_EMAIL", "dev@localhost")
 
 
 def _get_plan_urls() -> list[str]:
@@ -336,7 +338,18 @@ oauth.register(
 )
 
 
+def _is_localhost_request() -> bool:
+    # Use the raw socket peer address; intentionally do NOT trust
+    # X-Forwarded-For so the bypass cannot be triggered from outside.
+    remote = (request.remote_addr or "").lower()
+    return remote in ("127.0.0.1", "::1", "localhost")
+
+
 def _is_authenticated() -> bool:
+    if DEV_BYPASS_AUTH and _is_localhost_request():
+        if not session.get("user"):
+            session["user"] = {"email": DEV_USER_EMAIL, "name": "Dev User"}
+        return True
     user = session.get("user") or {}
     email = (user.get("email") or "").lower()
     if not email:
