@@ -5,7 +5,6 @@
   let selectedKey = window.__SELECTED_KEY__;
 
   const tabsEl = document.getElementById("tabs");
-  const updatedAtEl = document.getElementById("updatedAt");
   const summaryCardsEl = document.getElementById("summaryCards");
   const planRowsEl = document.getElementById("planRows");
   const sourceLinkEl = document.getElementById("sourceLink");
@@ -551,7 +550,6 @@
       return;
     }
 
-    updatedAtEl.textContent = ds.updated_at ? `Updated: ${ds.updated_at}` : "";
     renderSummary(ds);
     renderTable(ds);
     renderCharts(ds);
