@@ -733,6 +733,15 @@ html.dark-mode .state-demand {
 
   .hero {
     padding: 14px 16px;
+    padding-right: 56px;
+  }
+
+  .theme-toggle {
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
   }
 
   .hero h1 {
