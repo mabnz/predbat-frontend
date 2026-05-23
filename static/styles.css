@@ -214,8 +214,10 @@ h1 {
 }
 
 .refresh-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.75;
   cursor: wait;
+  color: var(--muted);
+  background: #f3eee5;
 }
 
 .charts-toggle {
@@ -274,7 +276,7 @@ h1 {
 
 .charts {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 1fr;
   gap: 12px;
   align-items: stretch;
 }

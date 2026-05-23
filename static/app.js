@@ -16,11 +16,14 @@
   const chartsContainerEl = document.getElementById("chartsContainer");
 
   const CHARTS_HIDDEN_KEY = "predbatChartsHidden";
-  let chartsHidden = false;
+  let chartsHidden = true;
   try {
-    chartsHidden = window.localStorage?.getItem(CHARTS_HIDDEN_KEY) === "1";
+    const stored = window.localStorage?.getItem(CHARTS_HIDDEN_KEY);
+    if (stored !== null && stored !== undefined) {
+      chartsHidden = stored === "1";
+    }
   } catch (_err) {
-    chartsHidden = false;
+    chartsHidden = true;
   }
 
   function applyChartsVisibility() {
@@ -52,7 +55,6 @@
   applyChartsVisibility();
 
   const charts = {
-    soc: null,
     energy: null,
   };
   let refreshInFlight = false;
@@ -524,7 +526,7 @@
           </div>
         </td>
         <td>${row.limit || "-"}</td>
-        <td>${fmt.num(row.pv_kwh)} kWh</td>
+        <td>${Number(row.pv_kwh) > 0 ? `${fmt.num(row.pv_kwh)} kWh` : "-"}</td>
         <td>${fmt.num(row.load_kwh)} kWh</td>
         <td${socCellStyle}>${fmt.num(row.soc, 0)}%</td>
         <td class="grid-cost-cell"${gridCostStyle}>${gridChargeCell}</td>
@@ -540,41 +542,8 @@
     }
     const rows = ds.rows || [];
     const labels = rows.map((r) => r.time_label);
-    const socs = rows.map((r) => r.soc);
     const pvs = rows.map((r) => r.pv_kwh);
     const loads = rows.map((r) => r.load_kwh);
-
-    if (!charts.soc) {
-      charts.soc = new Chart(document.getElementById("socChart"), {
-        type: "line",
-        data: {
-          labels,
-          datasets: [
-            {
-              label: "SoC %",
-              data: socs,
-              borderColor: "#007ea7",
-              backgroundColor: "rgba(0, 126, 167, 0.2)",
-              fill: true,
-              tension: 0.25,
-              pointRadius: 0,
-            },
-          ],
-        },
-        options: {
-          maintainAspectRatio: true,
-          aspectRatio: 3,
-          animation: false,
-          scales: {
-            y: { beginAtZero: true, max: 100 },
-          },
-        },
-      });
-    } else {
-      charts.soc.data.labels = labels;
-      charts.soc.data.datasets[0].data = socs;
-      charts.soc.update("none");
-    }
 
     if (!charts.energy) {
       charts.energy = new Chart(document.getElementById("energyChart"), {
