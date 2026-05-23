@@ -532,8 +532,8 @@
 
       tr.innerHTML = `
         <td>${row.time_label}</td>
-        <td${tariffStyle(row.import_rate)}>${fmt.num(row.import_rate)} ${currencyMinor}</td>
-        <td${tariffStyle(row.export_rate)}>${fmt.num(row.export_rate)} ${currencyMinor}</td>
+        <td${tariffStyle(row.import_rate)}>${fmt.num(row.import_rate)}${currencyMinor}</td>
+        <td${tariffStyle(row.export_rate)}>${fmt.num(row.export_rate)}${currencyMinor}</td>
         <td>
           <div class="state-cell">
             <span class="state-chip state-single ${state.className}" title="${state.rule}">${state.emoji} ${state.label}</span>
