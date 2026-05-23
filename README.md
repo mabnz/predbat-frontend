@@ -2,7 +2,11 @@
 
 I wasn't super happy with the UX [Predbat](https://github.com/springfall2008/batpred) presents, so I made my own. This is a Python frontend that fetches only the Predbat `/plan` page, extracts the embedded JSON datasets, and renders a cleaner dashboard UI.
 
-![Dashboard screenshot](docs/screenshot.png)
+<p align="center">
+  <img src="docs/screenshot-desktop.png" alt="Desktop dashboard" width="640" />
+  &nbsp;
+  <img src="docs/screenshot-mobile.png" alt="Mobile dashboard" width="220" />
+</p>
 
 ## What It Includes
 
