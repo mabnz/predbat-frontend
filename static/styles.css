@@ -240,16 +240,19 @@ h1 {
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .card h3 .card-sub {
-  display: block;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: none;
   color: var(--accent-two);
-  margin-top: 2px;
+  margin-left: auto;
 }
 
 .card p {
