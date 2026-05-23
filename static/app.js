@@ -445,7 +445,6 @@
         <span class="legend-chip state-discharge-grid" title="Battery discharging but grid is also supplementing load">🔋 Battery</span>
         <span class="legend-chip state-demand" title="Battery held at reserve">🔒 Discharge Lock</span>
         <span class="legend-chip state-demand" title="Battery held at the minimum reserve (5%)">🪫 Min discharge</span>
-        <span class="legend-chip legend-grid-icon" title="Tower marker shown when grid is being imported in that slot"><img class="grid-tower-icon" src="/static/img/transmission-tower.avif" alt=""> Grid import</span>
       `;
     }
 

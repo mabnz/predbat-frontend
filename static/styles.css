@@ -398,6 +398,11 @@ tr:nth-child(even) td {
   margin-left: auto;
   object-fit: contain;
   flex-shrink: 0;
+  padding: 3px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.7);
+  box-sizing: border-box;
 }
 
 .legend-grid-icon {
