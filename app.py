@@ -374,7 +374,7 @@ def require_auth(view):
 
 @app.route("/welcome")
 def welcome():
-    if _is_authenticated():
+    if _is_authenticated() and request.args.get("force") not in ("1", "true", "yes"):
         return redirect(url_for("plan"))
     return render_template(
         "welcome.html",
