@@ -593,36 +593,19 @@
       const tr = document.createElement("tr");
       const state = classifyState(row);
 
+      // Cost cell is driven by Predbat's per-slot cost_change (in major units).
+      // We never synthesise a cost when Predbat itself reports none.
       let gridChargeCell = "-";
       let gridCostStyle = "";
-      if (hasSocMax) {
-        const socChange = Number(row.soc_change);
-        const importRate = Number(row.import_rate);
-        const exportRate = Number(row.export_rate);
-        const pv = Number(row.pv_kwh || 0);
-        const load = Number(row.load_kwh || 0);
-        if (Number.isFinite(socChange)) {
-          const batteryKwh = (socChange / 100) * socMax;
-          const gridKwh = load - pv + batteryKwh;
-
-          if (gridKwh > 0.01 && Number.isFinite(importRate)) {
-            const costMinor = gridKwh * importRate;
-            const reason =
-              batteryKwh > 0.05
-                ? "battery charge + load"
-                : batteryKwh < -0.05
-                ? "load (offset by battery discharge)"
-                : "load only";
-            const title = `Import ${fmt.num(gridKwh)} kWh @ ${fmt.num(importRate)} ${currencyMinor} — ${reason} (load ${fmt.num(load)} − pv ${fmt.num(pv)} + battery ${fmt.num(batteryKwh)} kWh)`;
-            gridChargeCell = `<span title="${title}">+${costMinor.toFixed(0)}${currencyMinor}</span>`;
-            gridCostStyle = ` style="background: rgba(191, 6, 3, 0.18)"`;
-          } else if (gridKwh < -0.01 && Number.isFinite(exportRate) && state.label === "Exporting") {
-            const exportKwh = -gridKwh;
-            const earningsMinor = exportKwh * exportRate;
-            const title = `Export ${fmt.num(exportKwh)} kWh @ ${fmt.num(exportRate)} ${currencyMinor} (pv ${fmt.num(pv)} − load ${fmt.num(load)} − battery ${fmt.num(batteryKwh)} kWh)`;
-            gridChargeCell = `<span title="${title}">-${earningsMinor.toFixed(0)}${currencyMinor}</span>`;
-            gridCostStyle = ` style="background: rgba(21, 127, 31, 0.18)"`;
-          }
+      const costChangeMajor = Number(row.cost_change);
+      if (Number.isFinite(costChangeMajor) && Math.abs(costChangeMajor) >= 0.005) {
+        const costMinor = costChangeMajor * 100;
+        if (costMinor > 0) {
+          gridChargeCell = `<span title="Predbat slot cost: +${costMinor.toFixed(0)}${currencyMinor}">+${costMinor.toFixed(0)}${currencyMinor}</span>`;
+          gridCostStyle = ` style="background: rgba(191, 6, 3, 0.18)"`;
+        } else {
+          gridChargeCell = `<span title="Predbat slot earnings: ${costMinor.toFixed(0)}${currencyMinor}">${costMinor.toFixed(0)}${currencyMinor}</span>`;
+          gridCostStyle = ` style="background: rgba(21, 127, 31, 0.18)"`;
         }
       }
 
@@ -635,7 +618,8 @@
       }
 
       const gridForIcon = gridImportKwh(row);
-      const showGridIcon = gridForIcon !== null && gridForIcon > 0.05;
+      const hasPredbatCost = Number.isFinite(costChangeMajor) && costChangeMajor >= 0.005;
+      const showGridIcon = hasPredbatCost && gridForIcon !== null && gridForIcon > 0.05;
       const gridIconHtml = showGridIcon
         ? `<img class="grid-tower-icon" src="/static/img/transmission-tower.avif" alt="" title="Grid importing ${fmt.num(gridForIcon)} kWh">`
         : "";
