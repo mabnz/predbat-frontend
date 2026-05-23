@@ -76,6 +76,17 @@ body {
   color: var(--accent-two);
 }
 
+.hero-eyebrow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.eyebrow-version {
+  font-variant-numeric: tabular-nums;
+}
+
 h1 {
   margin: 4px 0 10px;
   font-size: clamp(28px, 4vw, 44px);

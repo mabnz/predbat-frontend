@@ -22,7 +22,10 @@
 
     <main class="layout">
       <header class="hero">
-        <p class="eyebrow">Predbat Planner</p>
+        <div class="hero-eyebrow">
+          <p class="eyebrow">Predbat Planner</p>
+          <p class="eyebrow eyebrow-version">v{{ version }}</p>
+        </div>
         <h1>Dashboard</h1>
         <p class="subtitle">Your battery, solar, and grid activity in one place.</p>
       </header>
@@ -92,7 +95,5 @@
         </section>
       {% endif %}
     </main>
-
-    <footer class="app-footer">v{{ version }}</footer>
   </body>
 </html>
