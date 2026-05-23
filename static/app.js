@@ -606,7 +606,7 @@
           const gridKwh = load - pv + batteryKwh;
 
           if (gridKwh > 0.01 && Number.isFinite(importRate)) {
-            const costMajor = (gridKwh * importRate) / 100;
+            const costMinor = gridKwh * importRate;
             const reason =
               batteryKwh > 0.05
                 ? "battery charge + load"
@@ -614,13 +614,13 @@
                 ? "load (offset by battery discharge)"
                 : "load only";
             const title = `Import ${fmt.num(gridKwh)} kWh @ ${fmt.num(importRate)} ${currencyMinor} — ${reason} (load ${fmt.num(load)} − pv ${fmt.num(pv)} + battery ${fmt.num(batteryKwh)} kWh)`;
-            gridChargeCell = `<span title="${title}">${fmt.money(costMajor, currencyMajor)}</span>`;
+            gridChargeCell = `<span title="${title}">+${costMinor.toFixed(0)}${currencyMinor}</span>`;
             gridCostStyle = ` style="background: rgba(191, 6, 3, 0.18)"`;
           } else if (gridKwh < -0.01 && Number.isFinite(exportRate) && state.label === "Exporting") {
             const exportKwh = -gridKwh;
-            const earningsMajor = (exportKwh * exportRate) / 100;
+            const earningsMinor = exportKwh * exportRate;
             const title = `Export ${fmt.num(exportKwh)} kWh @ ${fmt.num(exportRate)} ${currencyMinor} (pv ${fmt.num(pv)} − load ${fmt.num(load)} − battery ${fmt.num(batteryKwh)} kWh)`;
-            gridChargeCell = `<span title="${title}">−${fmt.money(earningsMajor, currencyMajor)}</span>`;
+            gridChargeCell = `<span title="${title}">-${earningsMinor.toFixed(0)}${currencyMinor}</span>`;
             gridCostStyle = ` style="background: rgba(21, 127, 31, 0.18)"`;
           }
         }

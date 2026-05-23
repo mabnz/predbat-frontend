@@ -599,6 +599,13 @@ tr:nth-child(even) td {
   text-align: center;
 }
 
+.welcome-icon {
+  display: block;
+  margin: 0 auto 16px;
+  width: 96px;
+  height: 96px;
+}
+
 .welcome-card .eyebrow {
   margin-bottom: 28px;
 }
