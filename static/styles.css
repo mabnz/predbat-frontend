@@ -589,8 +589,8 @@ tr:nth-child(even) td {
 }
 
 .welcome-card {
-  background: var(--panel);
-  border: 1px solid var(--line);
+  background: #12263a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
   box-shadow: var(--shadow);
   padding: 32px 28px;
