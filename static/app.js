@@ -300,14 +300,14 @@
 
     const cards = [];
     cards.push({
-      label: "Projected Cost<br>Remaining",
+      label: "Projected Cost Remaining",
       value: fmt.money(todayCost ?? totalCost, currencyMajor),
       type: "cost-remaining",
     });
     if (todaySpentSoFar !== null) {
       const totalTodayProjected = (todayCost ?? totalCost ?? 0) + todaySpentSoFar;
       cards.push({
-        label: "Projected Cost<br>Today",
+        label: "Projected Cost Today",
         value: fmt.money(totalTodayProjected, currencyMajor),
         type: "cost-today",
       });

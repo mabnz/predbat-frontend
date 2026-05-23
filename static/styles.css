@@ -272,11 +272,11 @@ h1 {
   position: relative;
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 10px 14px 12px;
-  min-width: 150px;
+  border-radius: 10px;
+  padding: 4px 12px 5px;
+  min-width: 130px;
   flex: 0 1 auto;
-  border-left-width: 4px;
+  border-left-width: 3px;
   transition: transform 140ms ease, box-shadow 140ms ease;
   display: flex;
   flex-direction: column;
@@ -333,8 +333,8 @@ h1 {
 }
 
 .card p {
-  margin: 12px 0 0;
-  font-size: 22px;
+  margin: 2px 0 0;
+  font-size: 16px;
   font-family: "IBM Plex Mono", monospace;
   font-weight: 500;
   color: var(--text);
@@ -343,7 +343,7 @@ h1 {
 
 .card-cost-remaining,
 .card-cost-today {
-  padding-top: 14px;
+  padding-top: 6px;
 }
 
 .charts {
