@@ -543,9 +543,54 @@ tr:nth-child(even) td {
     padding: 12px;
   }
 
+  .layout {
+    gap: 12px;
+  }
+
+  .hero {
+    padding: 14px 16px;
+  }
+
+  .hero h1 {
+    margin-top: 2px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  .toolbar {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .meta {
+    width: 100%;
+    font-size: 11px;
+  }
+
+  .meta p {
+    white-space: normal;
+  }
+
+  .cards {
+    width: 100%;
+    gap: 8px;
+  }
+
   .card {
-    flex: 1 1 calc(50% - 5px);
+    flex: 1 1 calc(50% - 4px);
     min-width: 0;
+    padding: 10px 12px 10px;
+  }
+
+  .card-cost-remaining,
+  .card-cost-today {
+    padding-top: 12px;
+  }
+
+  .card p {
+    font-size: 18px;
   }
 
   .hero,
@@ -554,7 +599,84 @@ tr:nth-child(even) td {
     border-radius: 14px;
   }
 
+  .panel {
+    padding: 12px;
+  }
+
+  .panel h2 {
+    font-size: 16px;
+  }
+
   canvas {
     max-height: 240px;
+  }
+
+  .charts-header h2 {
+    font-size: 13px;
+  }
+
+  /* Compact table for mobile */
+  .table-wrap {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  th,
+  td {
+    padding: 6px 6px;
+  }
+
+  thead th {
+    font-size: 11px;
+  }
+
+  .state-cell {
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .state-chip {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+
+  .grid-tower-icon {
+    width: 18px;
+    height: 18px;
+    padding: 2px;
+  }
+
+  .state-legend {
+    gap: 4px;
+    padding: 0 8px 8px;
+  }
+
+  .legend-chip {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+}
+
+@media (max-width: 420px) {
+  .card {
+    flex: 1 1 100%;
+  }
+
+  table {
+    font-size: 11px;
+  }
+
+  th,
+  td {
+    padding: 5px 5px;
+  }
+
+  .state-chip {
+    font-size: 9px;
+    padding: 3px 5px;
   }
 }
