@@ -367,9 +367,19 @@ def require_auth(view):
         if request.path.startswith("/api/"):
             return jsonify({"error": "unauthorized"}), 401
         session["next_url"] = request.full_path if request.query_string else request.path
-        return redirect(url_for("auth_login"))
+        return redirect(url_for("welcome"))
 
     return wrapper
+
+
+@app.route("/welcome")
+def welcome():
+    if _is_authenticated():
+        return redirect(url_for("plan"))
+    return render_template(
+        "welcome.html",
+        version=__version__,
+    )
 
 
 @app.route("/auth/login")
@@ -419,7 +429,7 @@ def auth_callback():
 @app.route("/auth/logout")
 def auth_logout():
     session.clear()
-    return redirect(url_for("plan"))
+    return redirect(url_for("welcome"))
 
 
 @app.route("/")
