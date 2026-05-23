@@ -147,14 +147,11 @@ h1 {
   padding: 8px 14px;
   min-width: 0;
   flex: 0 1 auto;
-  max-width: 320px;
 }
 
 .meta p {
   margin: 2px 0;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .meta a {

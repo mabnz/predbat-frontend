@@ -12,7 +12,6 @@
   const sourceLinkEl = document.getElementById("sourceLink");
   const refreshStatusEl = document.getElementById("refreshStatus");
   const refreshTimeEl = document.getElementById("refreshTime");
-  const refreshNowEl = document.getElementById("refreshNow");
   const stateLegendEl = document.getElementById("stateLegend");
   const chartsToggleEl = document.getElementById("chartsToggle");
   const chartsContainerEl = document.getElementById("chartsContainer");
@@ -88,10 +87,6 @@
     return Object.keys(datasets);
   }
 
-  function nowLabel() {
-    return new Date().toLocaleTimeString();
-  }
-
   function setRefreshStatus(kind, label) {
     if (!refreshStatusEl) {
       return;
@@ -108,10 +103,29 @@
     }
 
     refreshStatusEl.textContent = label;
+  }
 
-    if (refreshTimeEl) {
-      refreshTimeEl.textContent = `Last checked ${nowLabel()}`;
+  function updatePredbatTimestamp(ds) {
+    if (!refreshTimeEl) return;
+    const raw = ds?.updated_at;
+    if (!raw) {
+      refreshTimeEl.textContent = "";
+      return;
     }
+    const dt = new Date(raw);
+    if (Number.isNaN(dt.getTime())) {
+      refreshTimeEl.textContent = `Last update ${raw}`;
+      return;
+    }
+    refreshTimeEl.textContent = `Last update ${dt
+      .toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      .replace(/\b(am|pm)\b/i, (m) => m.toUpperCase())}`;
   }
 
   function updateSourceLink(url) {
@@ -597,6 +611,7 @@
     renderSummary(ds);
     renderTable(ds);
     renderCharts(ds);
+    updatePredbatTimestamp(ds);
 
     if (activeSourceUrl) {
       document.title = `${ds.label} | Predbat Plan Frontend`;
@@ -608,9 +623,6 @@
       return;
     }
     refreshInFlight = true;
-    if (refreshNowEl) {
-      refreshNowEl.disabled = true;
-    }
 
     try {
       const response = await fetch("/api/plan-data", {
@@ -646,17 +658,7 @@
       setRefreshStatus("warn", "Offline");
     } finally {
       refreshInFlight = false;
-      if (refreshNowEl) {
-        refreshNowEl.disabled = false;
-      }
     }
-  }
-
-  if (refreshNowEl) {
-    refreshNowEl.addEventListener("click", () => {
-      setRefreshStatus("info", "Updating");
-      refreshData();
-    });
   }
 
   render();
