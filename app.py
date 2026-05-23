@@ -217,6 +217,7 @@ class PlanDataset:
     rows: list[dict[str, Any]]
     totals: dict[str, Any]
     soc_max: float | None = None
+    current_soc: float | None = None
 
 
     @property
@@ -262,6 +263,7 @@ def _make_dataset(key: str, label: str, payload: dict[str, Any]) -> PlanDataset:
         rows=transformed_rows,
         totals=payload.get("totals", {}),
         soc_max=_to_float(payload.get("soc_max")),
+        current_soc=_to_float(payload.get("soc")),
     )
 
 

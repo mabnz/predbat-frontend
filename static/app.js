@@ -128,6 +128,30 @@
       .replace(/\b(am|pm)\b/i, (m) => m.toUpperCase())}`;
   }
 
+  function updateHeroBattery(ds) {
+    const el = document.getElementById("heroBattery");
+    if (!el) return;
+    const rows = ds?.rows || [];
+    const first = rows[0];
+    const soc = Number(first?.soc);
+    if (!Number.isFinite(soc)) {
+      el.textContent = "";
+      return;
+    }
+    const pct = Math.max(0, Math.min(100, soc));
+    const hue = pct * 1.2; // 0 (red) → 120 (green)
+    const fillColor = `hsl(${hue.toFixed(0)}, 65%, 45%)`;
+    const fillWidth = (pct / 100) * 30; // inner usable width
+    el.innerHTML = `
+      <svg class="hero-battery-icon" viewBox="0 0 40 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="1" y="2" width="34" height="14" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="36" y="6" width="3" height="6" rx="1" fill="currentColor"/>
+        <rect x="3" y="4" width="${fillWidth.toFixed(2)}" height="10" rx="1" fill="${fillColor}"/>
+      </svg>
+      <span class="hero-battery-value" style="color: ${fillColor}">${pct.toFixed(0)}%</span>
+    `;
+  }
+
   function updateSourceLink(url) {
     if (!url || !sourceLinkEl) {
       return;
@@ -662,6 +686,7 @@
     renderTable(ds);
     renderCharts(ds);
     updatePredbatTimestamp(ds);
+    updateHeroBattery(ds);
 
     if (activeSourceUrl) {
       document.title = `${ds.label} | Predbat Plan Frontend`;
