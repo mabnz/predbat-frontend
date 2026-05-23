@@ -1,3 +1,5 @@
+# Predbat Frontend
+# Version: 0.1.0
 from __future__ import annotations
 
 import json
@@ -11,6 +13,8 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template
 
 load_dotenv()
+
+__version__ = "0.1.0"
 
 PRED_BAT_PLAN_URL = os.getenv("PRED_BAT_PLAN_URL", "")
 PRED_BAT_PLAN_URLS = os.getenv("PRED_BAT_PLAN_URLS", "")
@@ -328,6 +332,7 @@ def plan() -> str:
         datasets=serialized,
         selected_key=selected_key,
         error=error,
+        version=__version__,
     )
 
 

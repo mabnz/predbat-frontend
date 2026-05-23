@@ -58,16 +58,10 @@
                 <canvas id="socChart" aria-label="Battery SoC chart" role="img"></canvas>
               </div>
             </article>
-            <article class="panel">
+            <article class="panel panel-wide">
               <h2>PV Vs Load</h2>
-              <div class="chart-shell">
+              <div class="chart-shell chart-shell-tall">
                 <canvas id="energyChart" aria-label="PV and load chart" role="img"></canvas>
-              </div>
-            </article>
-            <article class="panel">
-              <h2>Cost Change Per Slot</h2>
-              <div class="chart-shell">
-                <canvas id="costChart" aria-label="Cost delta chart" role="img"></canvas>
               </div>
             </article>
           </div>
@@ -98,5 +92,7 @@
         </section>
       {% endif %}
     </main>
+
+    <footer class="app-footer">v{{ version }}</footer>
   </body>
 </html>

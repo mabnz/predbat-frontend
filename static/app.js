@@ -54,7 +54,6 @@
   const charts = {
     soc: null,
     energy: null,
-    cost: null,
   };
   let refreshInFlight = false;
 
@@ -462,7 +461,6 @@
     const socs = rows.map((r) => r.soc);
     const pvs = rows.map((r) => r.pv_kwh);
     const loads = rows.map((r) => r.load_kwh);
-    const costChange = rows.map((r) => r.cost_change);
 
     if (!charts.soc) {
       charts.soc = new Chart(document.getElementById("socChart"), {
@@ -524,7 +522,7 @@
         },
         options: {
           maintainAspectRatio: true,
-          aspectRatio: 3,
+          aspectRatio: 2,
           animation: false,
         },
       });
@@ -533,33 +531,6 @@
       charts.energy.data.datasets[0].data = pvs;
       charts.energy.data.datasets[1].data = loads;
       charts.energy.update("none");
-    }
-
-    const costColors = costChange.map((v) => (Number(v) < 0 ? "#157f1f" : "#bf0603"));
-    if (!charts.cost) {
-      charts.cost = new Chart(document.getElementById("costChart"), {
-        type: "bar",
-        data: {
-          labels,
-          datasets: [
-            {
-              label: "Cost Delta",
-              data: costChange,
-              backgroundColor: costColors,
-            },
-          ],
-        },
-        options: {
-          maintainAspectRatio: true,
-          aspectRatio: 3,
-          animation: false,
-        },
-      });
-    } else {
-      charts.cost.data.labels = labels;
-      charts.cost.data.datasets[0].data = costChange;
-      charts.cost.data.datasets[0].backgroundColor = costColors;
-      charts.cost.update("none");
     }
   }
 
