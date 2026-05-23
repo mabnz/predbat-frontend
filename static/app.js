@@ -180,19 +180,58 @@
       }
     }
 
-    const cards = [
-      { label: "Projected Total", value: fmt.money(totalCost, currencyMajor) },
-      {
-        label: "PV Forecast",
-        subLabel: windowLabel,
-        value: `${fmt.num(ds.totals?.pv_forecast)} kWh`,
-      },
-      {
-        label: "Load Forecast",
-        subLabel: windowLabel,
-        value: `${fmt.num(ds.totals?.load_forecast)} kWh`,
-      },
-    ];
+    // Split projected cost into today vs tomorrow if we have a full forecast
+    // for tomorrow (>= 40 of 48 half-hour slots covered).
+    let todayCost = null;
+    let tomorrowCost = null;
+    let tomorrowComplete = false;
+    if (rows.length) {
+      const first = new Date(rows[0].time);
+      if (!Number.isNaN(first.getTime())) {
+        const todayKey = first.toDateString();
+        const tomorrowDate = new Date(first);
+        tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+        const tomorrowKey = tomorrowDate.toDateString();
+
+        let todayLastTotal = null;
+        let tomorrowLastTotal = null;
+        let tomorrowSlotCount = 0;
+        rows.forEach((r) => {
+          const total = Number(r.total_cost);
+          if (!Number.isFinite(total)) return;
+          const d = new Date(r.time);
+          if (Number.isNaN(d.getTime())) return;
+          const key = d.toDateString();
+          if (key === todayKey) {
+            todayLastTotal = total;
+          } else if (key === tomorrowKey) {
+            tomorrowLastTotal = total;
+            tomorrowSlotCount += 1;
+          }
+        });
+
+        if (todayLastTotal !== null) {
+          todayCost = todayLastTotal;
+        }
+        if (tomorrowLastTotal !== null) {
+          tomorrowCost = tomorrowLastTotal - (todayLastTotal || 0);
+          tomorrowComplete = tomorrowSlotCount >= 48;
+        }
+      }
+    }
+
+    const cards = [];
+    cards.push({ label: "Projected Cost Today", value: fmt.money(todayCost ?? totalCost, currencyMajor) });
+    cards.push({
+      label: "PV Forecast",
+      subLabel: windowLabel,
+      value: `${fmt.num(ds.totals?.pv_forecast)} kWh`,
+    });
+    cards.push({
+      label: "Load Forecast",
+      subLabel: windowLabel,
+      value: `${fmt.num(ds.totals?.load_forecast)} kWh`,
+    });
 
     summaryCardsEl.innerHTML = "";
 
