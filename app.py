@@ -85,6 +85,121 @@ def _to_float(value: Any) -> float | None:
         return None
 
 
+def _parse_datetime(value: str) -> datetime | None:
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def _state_from_soc_change(value: float) -> tuple[str, str]:
+    if value > 0.05:
+        return "&nearr;", "Charging"
+    if value < -0.05:
+        return "&searr;", "Discharging"
+    return "&rarr;", "Demand"
+
+
+def _aggregate_rows_hourly(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    buckets: dict[tuple[int, int, int, int], dict[str, Any]] = {}
+    order: list[tuple[int, int, int, int]] = []
+
+    for row in rows:
+        dt = _parse_datetime(str(row.get("time", "")))
+        if dt is None:
+            continue
+
+        key = (dt.year, dt.month, dt.day, dt.hour)
+        if key not in buckets:
+            hour_dt = dt.replace(minute=0, second=0, microsecond=0)
+            buckets[key] = {
+                "time": hour_dt.isoformat(),
+                "import_rate_sum": 0.0,
+                "import_rate_count": 0,
+                "export_rate_sum": 0.0,
+                "export_rate_count": 0,
+                "pv_kwh_sum": 0.0,
+                "load_kwh_sum": 0.0,
+                "cost_change_sum": 0.0,
+                "soc_change_sum": 0.0,
+                "soc_last": None,
+                "total_cost_last": None,
+                "state_target": "",
+            }
+            order.append(key)
+
+        bucket = buckets[key]
+
+        import_rate = _to_float(row.get("import_rate"))
+        if import_rate is not None:
+            bucket["import_rate_sum"] += import_rate
+            bucket["import_rate_count"] += 1
+
+        export_rate = _to_float(row.get("export_rate"))
+        if export_rate is not None:
+            bucket["export_rate_sum"] += export_rate
+            bucket["export_rate_count"] += 1
+
+        pv_kwh = _to_float(row.get("pv_forecast"))
+        if pv_kwh is not None:
+            bucket["pv_kwh_sum"] += pv_kwh
+
+        load_kwh = _to_float(row.get("load_forecast"))
+        if load_kwh is not None:
+            bucket["load_kwh_sum"] += load_kwh
+
+        cost_change = _to_float(row.get("cost_change"))
+        if cost_change is not None:
+            bucket["cost_change_sum"] += cost_change
+
+        soc_change = _to_float(row.get("soc_change"))
+        if soc_change is not None:
+            bucket["soc_change_sum"] += soc_change
+
+        soc = _to_float(row.get("soc_percent"))
+        if soc is not None:
+            bucket["soc_last"] = soc
+
+        total_cost = _to_float(row.get("total_cost"))
+        if total_cost is not None:
+            bucket["total_cost_last"] = total_cost
+
+        state_target = row.get("state_target")
+        if state_target:
+            bucket["state_target"] = state_target
+
+    aggregated: list[dict[str, Any]] = []
+    for key in order:
+        bucket = buckets[key]
+        import_rate_count = bucket["import_rate_count"]
+        export_rate_count = bucket["export_rate_count"]
+        soc_change_sum = bucket["soc_change_sum"]
+        state_symbol, state_text = _state_from_soc_change(soc_change_sum)
+
+        aggregated.append(
+            {
+                "time": bucket["time"],
+                "import_rate": (
+                    bucket["import_rate_sum"] / import_rate_count if import_rate_count else None
+                ),
+                "export_rate": (
+                    bucket["export_rate_sum"] / export_rate_count if export_rate_count else None
+                ),
+                "state_html": state_symbol,
+                "state_text": state_text,
+                "state_target": bucket["state_target"],
+                "pv_forecast": bucket["pv_kwh_sum"],
+                "load_forecast": bucket["load_kwh_sum"],
+                "soc_percent": bucket["soc_last"],
+                "soc_change": soc_change_sum,
+                "cost_change": bucket["cost_change_sum"],
+                "total_cost": bucket["total_cost_last"],
+            }
+        )
+
+    return aggregated
+
+
 @dataclass
 class PlanDataset:
     key: str
@@ -93,6 +208,7 @@ class PlanDataset:
     currency_symbols: list[str]
     rows: list[dict[str, Any]]
     totals: dict[str, Any]
+    soc_max: float | None = None
 
 
     @property
@@ -108,7 +224,8 @@ class PlanDataset:
 
 
 def _make_dataset(key: str, label: str, payload: dict[str, Any]) -> PlanDataset:
-    rows: list[dict[str, Any]] = payload.get("rows", [])
+    source_rows: list[dict[str, Any]] = payload.get("rows", [])
+    rows = _aggregate_rows_hourly(source_rows)
     transformed_rows: list[dict[str, Any]] = []
 
     for row in rows:
@@ -124,6 +241,7 @@ def _make_dataset(key: str, label: str, payload: dict[str, Any]) -> PlanDataset:
                 "pv_kwh": _to_float(row.get("pv_forecast")),
                 "load_kwh": _to_float(row.get("load_forecast")),
                 "soc": _to_float(row.get("soc_percent")),
+                "soc_change": _to_float(row.get("soc_change")),
                 "cost_change": _to_float(row.get("cost_change")),
                 "total_cost": _to_float(row.get("total_cost")),
             }
@@ -136,6 +254,7 @@ def _make_dataset(key: str, label: str, payload: dict[str, Any]) -> PlanDataset:
         currency_symbols=payload.get("currency_symbols", ["$", "c"]),
         rows=transformed_rows,
         totals=payload.get("totals", {}),
+        soc_max=_to_float(payload.get("soc_max")),
     )
 
 
@@ -196,6 +315,7 @@ def plan() -> str:
             "totals": ds.totals,
             "total_cost": ds.total_cost,
             "final_soc": ds.final_soc,
+            "soc_max": ds.soc_max,
         }
         for key, ds in datasets.items()
     }
@@ -224,6 +344,7 @@ def plan_data_api() -> Any:
             "totals": ds.totals,
             "total_cost": ds.total_cost,
             "final_soc": ds.final_soc,
+            "soc_max": ds.soc_max,
         }
         for key, ds in datasets.items()
     }

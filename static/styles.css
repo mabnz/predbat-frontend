@@ -204,9 +204,16 @@ h1 {
   font-size: 18px;
 }
 
-canvas {
+.chart-shell {
+  position: relative;
   width: 100%;
-  height: 280px;
+}
+
+canvas {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 280px;
+  display: block;
 }
 
 .table-wrap {
@@ -256,6 +263,83 @@ tr:nth-child(even) td {
   color: var(--warn);
 }
 
+.state-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.state-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 5px 9px;
+  border: 1px solid transparent;
+}
+
+.state-single {
+  font-size: 11px;
+}
+
+.state-pv-charge {
+  background: rgba(21, 127, 31, 0.12);
+  border-color: rgba(21, 127, 31, 0.3);
+  color: #0e6418;
+}
+
+.state-grid-charge {
+  background: rgba(0, 126, 167, 0.12);
+  border-color: rgba(0, 126, 167, 0.28);
+  color: #045f7c;
+}
+
+.state-frozen {
+  background: rgba(79, 100, 117, 0.12);
+  border-color: rgba(79, 100, 117, 0.3);
+  color: #364a58;
+}
+
+.state-export {
+  background: rgba(255, 122, 24, 0.12);
+  border-color: rgba(255, 122, 24, 0.3);
+  color: #8a4a08;
+}
+
+.state-discharge,
+.state-peak {
+  background: rgba(191, 6, 3, 0.1);
+  border-color: rgba(191, 6, 3, 0.26);
+  color: #8a0302;
+}
+
+.state-demand {
+  background: rgba(79, 100, 117, 0.12);
+  border-color: rgba(79, 100, 117, 0.26);
+  color: #364a58;
+}
+
+.state-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 14px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.legend-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -293,6 +377,6 @@ tr:nth-child(even) td {
   }
 
   canvas {
-    height: 240px;
+    max-height: 240px;
   }
 }

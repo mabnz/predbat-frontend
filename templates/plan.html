@@ -48,20 +48,27 @@
         <section class="charts">
           <article class="panel">
             <h2>Battery State Of Charge</h2>
-            <canvas id="socChart" aria-label="Battery SoC chart" role="img"></canvas>
+            <div class="chart-shell">
+              <canvas id="socChart" aria-label="Battery SoC chart" role="img"></canvas>
+            </div>
           </article>
           <article class="panel">
             <h2>PV Vs Load</h2>
-            <canvas id="energyChart" aria-label="PV and load chart" role="img"></canvas>
+            <div class="chart-shell">
+              <canvas id="energyChart" aria-label="PV and load chart" role="img"></canvas>
+            </div>
           </article>
           <article class="panel">
             <h2>Cost Change Per Slot</h2>
-            <canvas id="costChart" aria-label="Cost delta chart" role="img"></canvas>
+            <div class="chart-shell">
+              <canvas id="costChart" aria-label="Cost delta chart" role="img"></canvas>
+            </div>
           </article>
         </section>
 
         <section class="panel table-wrap">
-          <h2>Timeslot Detail</h2>
+          <h2>Hourly Detail</h2>
+          <div class="state-legend" id="stateLegend"></div>
           <div class="table-scroll">
             <table>
               <thead>
@@ -74,6 +81,7 @@
                   <th>PV</th>
                   <th>Load</th>
                   <th>SoC</th>
+                  <th>Grid Charge</th>
                   <th>Cost Delta</th>
                   <th>Total Cost</th>
                 </tr>
