@@ -541,7 +541,7 @@
 
       const grid = gridImportKwh(row);
       const atMinimum = Number.isFinite(soc) && soc <= 5;
-      const lockLabel = atMinimum ? "Minimum battery level" : "Freeze charge";
+      const lockLabel = atMinimum ? "Minimum battery level" : "Charge freeze";
       const lockEmoji = atMinimum ? "🪫" : "🔒";
 
       if (grid !== null && grid > 0.05) {
@@ -569,7 +569,7 @@
         <span class="legend-chip state-export" title="Surplus likely exporting with favorable export context">⬆️ Exporting</span>
         <span class="legend-chip state-discharge" title="Battery discharging to support demand">🔋 Discharging</span>
         <span class="legend-chip state-discharge-grid" title="Battery discharging but grid is also supplementing load">🔋 Battery</span>
-        <span class="legend-chip state-demand" title="Battery held at reserve">🔒 Freeze charge</span>
+        <span class="legend-chip state-demand" title="Battery held at reserve">🔒 Charge freeze</span>
         <span class="legend-chip state-demand" title="Battery held at the minimum reserve (5%)">🪫 Minimum battery level</span>
       `;
     }
