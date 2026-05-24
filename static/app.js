@@ -540,7 +540,7 @@
           return {
             label: "Battery",
             emoji: "🔋",
-            className: "state-peak",
+            className: "state-discharge-grid",
             rule: `Rule: discharging during peak tariff (import_rate ${fmt.num(importRate)}c >= high_import ${fmt.num(highImportRate)}c, spread ${fmt.num(importSpread)}c)`,
           };
         }
