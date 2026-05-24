@@ -197,6 +197,41 @@ body {
   font-family: "IBM Plex Mono", monospace;
 }
 
+.hero-battery-float {
+  position: fixed;
+  top: 19px;
+  right: 64px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  font-size: 14px;
+  font-weight: 700;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.hero-battery-float.is-visible {
+  display: inline-flex;
+}
+
+@media (max-width: 680px) {
+  .hero-battery-float {
+    top: 11px;
+    right: 48px;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  .hero-battery-float .hero-battery-icon {
+    width: 32px;
+    height: 14px;
+  }
+}
+
 h1 {
   margin: 4px 0 10px;
   font-size: clamp(28px, 4vw, 44px);

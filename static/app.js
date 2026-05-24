@@ -173,19 +173,21 @@
 
   function updateHeroBattery(ds) {
     const el = document.getElementById("heroBattery");
+    const floatEl = document.getElementById("heroBatteryFloat");
     if (!el) return;
     const rows = ds?.rows || [];
     const first = rows[0];
     const soc = Number(first?.soc);
     if (!Number.isFinite(soc)) {
       el.textContent = "";
+      if (floatEl) floatEl.textContent = "";
       return;
     }
     const pct = Math.max(0, Math.min(100, soc));
     const hue = pct * 1.2; // 0 (red) → 120 (green)
     const fillColor = `hsl(${hue.toFixed(0)}, 65%, 45%)`;
     const fillWidth = (pct / 100) * 30; // inner usable width
-    el.innerHTML = `
+    const html = `
       <svg class="hero-battery-icon" viewBox="0 0 40 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <rect x="1" y="2" width="34" height="14" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
         <rect x="36" y="6" width="3" height="6" rx="1" fill="currentColor"/>
@@ -193,6 +195,8 @@
       </svg>
       <span class="hero-battery-value" style="color: ${fillColor}">${pct.toFixed(0)}%</span>
     `;
+    el.innerHTML = html;
+    if (floatEl) floatEl.innerHTML = html;
   }
 
   function updateSourceLink(url) {
@@ -797,6 +801,20 @@
   if (tableScrollEl) {
     tableScrollEl.addEventListener("scroll", updateTableFades, { passive: true });
     window.addEventListener("resize", updateTableFades);
+  }
+
+  // Show floating battery once the inline one scrolls out of view.
+  const heroBatteryEl = document.getElementById("heroBattery");
+  const heroBatteryFloatEl = document.getElementById("heroBatteryFloat");
+  if (heroBatteryEl && heroBatteryFloatEl && "IntersectionObserver" in window) {
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        heroBatteryFloatEl.classList.toggle("is-visible", !entry.isIntersecting);
+      },
+      { rootMargin: "-8px 0px 0px 0px", threshold: 0 }
+    );
+    obs.observe(heroBatteryEl);
   }
 
   render();
