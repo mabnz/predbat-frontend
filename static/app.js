@@ -454,6 +454,28 @@
       const charging = sym.includes("nearr") || sym.includes("↗") || text.includes("charge");
       const discharging = sym.includes("searr") || sym.includes("↘") || text.includes("discharg");
 
+      // Predbat itself attributes earnings to this slot — treat as Exporting
+      // regardless of charge/discharge symbol (covers active discharge-to-grid).
+      if (Number.isFinite(costDelta) && costDelta <= -0.005) {
+        const exportingChip = {
+          label: "Exporting",
+          emoji: "⬆️",
+          className: "state-export",
+          rule: `Rule: predbat cost_change (${fmt.num(costDelta)}) is negative — net earnings from grid export`,
+        };
+        if (charging && netSolar > 0.25) {
+          exportingChip.extras = [
+            {
+              label: "PV Charge",
+              emoji: "☀️",
+              className: "state-pv-charge",
+              rule: `Rule: also charging from PV (pv-load ${fmt.num(netSolar)}kWh > 0.25)`,
+            },
+          ];
+        }
+        return exportingChip;
+      }
+
       if (
         !charging &&
         !discharging &&
@@ -631,6 +653,9 @@
         <td>
           <div class="state-cell">
             <span class="state-chip state-single ${state.className}" title="${state.rule}">${state.emoji} ${state.label}</span>
+            ${(state.extras || [])
+              .map((extra) => `<span class="state-chip state-single ${extra.className}" title="${extra.rule}">${extra.emoji} ${extra.label}</span>`)
+              .join("")}
             ${gridIconHtml}
           </div>
         </td>
