@@ -480,7 +480,7 @@
         netSolar > 0.25
       ) {
         return {
-          label: "Charge Frozen",
+          label: "Charge hold",
           emoji: "⏸️",
           className: "state-frozen",
           rule: `Rule: no charge/discharge and soc (${fmt.num(soc, 0)}%) >= limit-1 (${fmt.num(limitPct - 1, 0)}%) and pv-load (${fmt.num(netSolar)}kWh) > 0.25`,
@@ -541,7 +541,7 @@
 
       const grid = gridImportKwh(row);
       const atMinimum = Number.isFinite(soc) && soc <= 5;
-      const lockLabel = atMinimum ? "Minimum battery level" : "Discharge Lock";
+      const lockLabel = atMinimum ? "Minimum battery level" : "Freeze charge";
       const lockEmoji = atMinimum ? "🪫" : "🔒";
 
       if (grid !== null && grid > 0.05) {
@@ -565,11 +565,11 @@
       stateLegendEl.innerHTML = `
         <span class="legend-chip state-pv-charge" title="Charging while PV exceeds load">☀️ PV Charge</span>
         <span class="legend-chip state-grid-charge" title="Charging with low import price or PV deficit">⚡ Grid Charge</span>
-        <span class="legend-chip state-frozen" title="PV available but charging held near target limit">⏸️ Charge Frozen</span>
+        <span class="legend-chip state-frozen" title="PV available but charging held near target limit">⏸️ Charge hold</span>
         <span class="legend-chip state-export" title="Surplus likely exporting with favorable export context">⬆️ Exporting</span>
         <span class="legend-chip state-discharge" title="Battery discharging to support demand">🔋 Discharging</span>
         <span class="legend-chip state-discharge-grid" title="Battery discharging but grid is also supplementing load">🔋 Battery</span>
-        <span class="legend-chip state-demand" title="Battery held at reserve">🔒 Discharge Lock</span>
+        <span class="legend-chip state-demand" title="Battery held at reserve">🔒 Freeze charge</span>
         <span class="legend-chip state-demand" title="Battery held at the minimum reserve (5%)">🪫 Minimum battery level</span>
       `;
     }
