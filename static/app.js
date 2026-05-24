@@ -738,7 +738,7 @@
     updateHeroBattery(ds);
 
     if (activeSourceUrl) {
-      document.title = `${ds.label} | Predbat Plan Frontend`;
+      document.title = `${ds.label} | Predbat`;
     }
   }
 
