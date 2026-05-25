@@ -701,8 +701,8 @@
             {
               label: "Load kWh",
               data: loads,
-              borderColor: "#12263a",
-              backgroundColor: "rgba(18, 38, 58, 0.2)",
+              borderColor: "#007ea7",
+              backgroundColor: "rgba(0, 126, 167, 0.25)",
               fill: true,
               tension: 0.25,
               pointRadius: 0,
