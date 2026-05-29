@@ -7,7 +7,7 @@ import json
 import os
 import secrets
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 import requests
@@ -326,7 +326,13 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_SECURE=OAUTH_REDIRECT_BASE_URL.startswith("https://"),
+    PERMANENT_SESSION_LIFETIME=timedelta(days=30),
 )
+
+
+@app.before_request
+def _make_session_permanent() -> None:
+    session.permanent = True
 
 oauth = OAuth(app)
 oauth.register(
