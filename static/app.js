@@ -523,14 +523,40 @@
       }
 
       if (charging) {
-        const cheapWindow = Number.isFinite(importRate) && Number.isFinite(lowImportRate) && importRate <= lowImportRate;
+        // Only call it "Grid Charge" when there's actual evidence of grid
+        // import for this slot — either Predbat attributes a positive cost,
+        // or the derived grid kWh is meaningfully > 0. This keeps the label
+        // consistent with the cost cell and grid-tower icon, which are both
+        // gated on cost_change / gridImportKwh.
+        const grid = gridImportKwh(row);
+        const hasGridCost = Number.isFinite(costDelta) && costDelta >= 0.005;
+        const hasGridFlow = grid !== null && grid > 0.05;
+        if (hasGridCost || hasGridFlow) {
+          const cheapWindow = Number.isFinite(importRate) && Number.isFinite(lowImportRate) && importRate <= lowImportRate;
+          return {
+            label: "Grid Charge",
+            emoji: "⚡",
+            className: "state-grid-charge",
+            rule: cheapWindow
+              ? `Rule: charging and import_rate (${fmt.num(importRate)}c) <= low_import (${fmt.num(lowImportRate)}c); grid evidence: cost_change ${fmt.num(costDelta)}, grid ${grid === null ? "n/a" : fmt.num(grid) + " kWh"}`
+              : `Rule: charging with grid evidence (cost_change ${fmt.num(costDelta)}, grid ${grid === null ? "n/a" : fmt.num(grid) + " kWh"})`,
+          };
+        }
+        // Charging but no grid evidence — treat as PV-driven (or held) so we
+        // don't show "Grid Charge" without an icon or cost.
+        if (pv > 0.05) {
+          return {
+            label: "PV Charge",
+            emoji: "☀️",
+            className: "state-pv-charge",
+            rule: `Rule: charging with no grid evidence (cost_change ${fmt.num(costDelta)}, grid ${grid === null ? "n/a" : fmt.num(grid) + " kWh"}) and pv ${fmt.num(pv)}kWh > 0.05`,
+          };
+        }
         return {
-          label: "Grid Charge",
-          emoji: "⚡",
-          className: "state-grid-charge",
-          rule: cheapWindow
-            ? `Rule: charging and import_rate (${fmt.num(importRate)}c) <= low_import (${fmt.num(lowImportRate)}c)`
-            : `Rule: charging and pv-load (${fmt.num(netSolar)}kWh) <= 0.25`,
+          label: "Charge hold",
+          emoji: "⏸️",
+          className: "state-frozen",
+          rule: `Rule: charging symbol but no grid evidence (cost_change ${fmt.num(costDelta)}, grid ${grid === null ? "n/a" : fmt.num(grid) + " kWh"}) and pv (${fmt.num(pv)}kWh) <= 0.05`,
         };
       }
 
