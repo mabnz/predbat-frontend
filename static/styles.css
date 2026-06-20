@@ -754,6 +754,15 @@ tr:nth-child(even) td {
   color: #045f7c;
 }
 
+.state-split {
+  --split-pv-color: rgba(168, 85, 247, 0.45);
+  --split-grid-color: rgba(0, 126, 167, 0.4);
+  gap: 6px;
+  border-color: rgba(99, 102, 130, 0.4);
+  color: #1f2937;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.55);
+}
+
 .state-frozen {
   background: rgba(79, 100, 117, 0.12);
   border-color: rgba(79, 100, 117, 0.3);
@@ -795,6 +804,14 @@ html.dark-mode .state-grid-charge {
   background: rgba(56, 189, 248, 0.18);
   border-color: rgba(56, 189, 248, 0.45);
   color: #7dd3fc;
+}
+
+html.dark-mode .state-split {
+  --split-pv-color: rgba(168, 85, 247, 0.5);
+  --split-grid-color: rgba(56, 189, 248, 0.45);
+  border-color: rgba(148, 163, 184, 0.45);
+  color: #f8fafc;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 html.dark-mode .state-frozen {

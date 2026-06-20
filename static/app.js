@@ -513,52 +513,93 @@
         };
       }
 
-      if (charging && netSolar > 0.25) {
-        return {
-          label: "PV Charge",
-          emoji: "☀️",
-          className: "state-pv-charge",
-          rule: `Rule: charging and pv-load (${fmt.num(netSolar)}kWh) > 0.25`,
-        };
-      }
-
       if (charging) {
-        // Only call it "Grid Charge" when there's actual evidence of grid
-        // import for this slot — either Predbat attributes a positive cost,
-        // or the derived grid kWh is meaningfully > 0. This keeps the label
-        // consistent with the cost cell and grid-tower icon, which are both
-        // gated on cost_change / gridImportKwh.
+        // Work out how much of the battery charge for this slot came from PV
+        // surplus vs the grid, and present a single pill that reflects the mix.
+        const split = chargeSplit(row);
+        if (split) {
+          const cheapWindow = Number.isFinite(importRate) && Number.isFinite(lowImportRate) && importRate <= lowImportRate;
+
+          // Effectively all PV — no meaningful grid contribution.
+          if (split.gridKwh <= 0.05 || split.gridPct < 5) {
+            return {
+              label: "PV Charge",
+              emoji: "☀️",
+              className: "state-pv-charge",
+              rule: `Rule: charging, battery ${fmt.num(split.batteryKwh)}kWh sourced PV ${split.pvPct.toFixed(0)}% / grid ${split.gridPct.toFixed(0)}%`,
+            };
+          }
+
+          // Effectively all grid — only label it when the grid charge into the
+          // battery is meaningful (> 0.4 kWh), otherwise it's just a hold.
+          if (split.pvKwh <= 0.05 || split.pvPct < 5) {
+            if (split.gridKwh > 0.4) {
+              return {
+                label: "Grid Charge",
+                emoji: "⚡",
+                className: "state-grid-charge",
+                rule: cheapWindow
+                  ? `Rule: charging and import_rate (${fmt.num(importRate)}c) <= low_import (${fmt.num(lowImportRate)}c); battery ${fmt.num(split.batteryKwh)}kWh all from grid`
+                  : `Rule: charging, battery ${fmt.num(split.batteryKwh)}kWh all from grid (${fmt.num(split.gridKwh)}kWh)`,
+              };
+            }
+            return {
+              label: "Charge hold",
+              emoji: "⏸️",
+              className: "state-frozen",
+              rule: `Rule: charging but grid charge (${fmt.num(split.gridKwh)}kWh) <= 0.4 and no PV surplus`,
+            };
+          }
+
+          // Genuine mix of PV + grid — dual-colour split pill whose shading is
+          // proportional to where the battery charge came from.
+          return {
+            label: "Charge",
+            emoji: "🔌",
+            className: "state-split-charge",
+            split: {
+              pvPct: split.pvPct,
+              gridPct: split.gridPct,
+              pvKwh: split.pvKwh,
+              gridKwh: split.gridKwh,
+            },
+            rule: `Rule: charging, battery ${fmt.num(split.batteryKwh)}kWh — PV ${split.pvPct.toFixed(0)}% (${fmt.num(split.pvKwh)}kWh) / grid ${split.gridPct.toFixed(0)}% (${fmt.num(split.gridKwh)}kWh)`,
+          };
+        }
+
+        // No battery data to derive the split — fall back to the prior
+        // PV-surplus / grid-cost heuristic so we still label the slot.
+        if (netSolar > 0.25) {
+          return {
+            label: "PV Charge",
+            emoji: "☀️",
+            className: "state-pv-charge",
+            rule: `Rule: charging and pv-load (${fmt.num(netSolar)}kWh) > 0.25 (no battery data)`,
+          };
+        }
         const grid = gridImportKwh(row);
         const hasGridCost = Number.isFinite(costDelta) && costDelta >= 0.005;
-        const hasGridFlow = grid !== null && grid > 0.4;
-        // Gate the pill on actual grid import > 0.4 kWh. Only fall back to
-        // Predbat's cost signal when grid kWh can't be derived (grid === null).
-        if (hasGridFlow || (grid === null && hasGridCost)) {
-          const cheapWindow = Number.isFinite(importRate) && Number.isFinite(lowImportRate) && importRate <= lowImportRate;
+        if (grid === null && hasGridCost) {
           return {
             label: "Grid Charge",
             emoji: "⚡",
             className: "state-grid-charge",
-            rule: cheapWindow
-              ? `Rule: charging and import_rate (${fmt.num(importRate)}c) <= low_import (${fmt.num(lowImportRate)}c); grid evidence: cost_change ${fmt.num(costDelta)}, grid ${grid === null ? "n/a" : fmt.num(grid) + " kWh"}`
-              : `Rule: charging with grid evidence (cost_change ${fmt.num(costDelta)}, grid ${grid === null ? "n/a" : fmt.num(grid) + " kWh"})`,
+            rule: `Rule: charging with grid cost evidence (cost_change ${fmt.num(costDelta)}); no battery data`,
           };
         }
-        // Charging but no grid evidence — treat as PV-driven (or held) so we
-        // don't show "Grid Charge" without an icon or cost.
         if (pv > 0.05) {
           return {
             label: "PV Charge",
             emoji: "☀️",
             className: "state-pv-charge",
-            rule: `Rule: charging with no grid evidence (cost_change ${fmt.num(costDelta)}, grid ${grid === null ? "n/a" : fmt.num(grid) + " kWh"}) and pv ${fmt.num(pv)}kWh > 0.05`,
+            rule: `Rule: charging, no battery data, pv ${fmt.num(pv)}kWh > 0.05`,
           };
         }
         return {
           label: "Charge hold",
           emoji: "⏸️",
           className: "state-frozen",
-          rule: `Rule: charging symbol but no grid evidence (cost_change ${fmt.num(costDelta)}, grid ${grid === null ? "n/a" : fmt.num(grid) + " kWh"}) and pv (${fmt.num(pv)}kWh) <= 0.05`,
+          rule: `Rule: charging symbol but no battery data and pv (${fmt.num(pv)}kWh) <= 0.05`,
         };
       }
 
@@ -619,6 +660,7 @@
       stateLegendEl.innerHTML = `
         <span class="legend-chip state-pv-charge" title="Charging while PV exceeds load">☀️ PV Charge</span>
         <span class="legend-chip state-grid-charge" title="Charging with low import price or PV deficit">⚡ Grid Charge</span>
+        <span class="legend-chip state-split" style="background: linear-gradient(90deg, var(--split-pv-color) 0 50%, var(--split-grid-color) 50% 100%)" title="Charging from a mix of PV surplus and grid; shading shows the proportion of each">☀️ % ⚡ %</span>
         <span class="legend-chip state-frozen" title="PV available but charging held near target limit">⏸️ Charge hold</span>
         <span class="legend-chip state-export" title="Surplus likely exporting with favorable export context">⬆️ Exporting</span>
         <span class="legend-chip state-discharge" title="Battery discharging to support demand">🔋 Discharging</span>
@@ -641,6 +683,41 @@
       if (!Number.isFinite(socChange)) return null;
       const batteryKwh = (socChange / 100) * socMax;
       return load - pv + batteryKwh;
+    }
+
+    // Split this slot's battery charge between PV surplus and grid import.
+    // PV covers load first; only the surplus (pv - load) can charge the battery,
+    // and any remaining battery charge must come from the grid.
+    function chargeSplit(row) {
+      if (!hasSocMax) return null;
+      const socChange = Number(row.soc_change);
+      if (!Number.isFinite(socChange)) return null;
+      const batteryKwh = (socChange / 100) * socMax;
+      if (batteryKwh <= 0.01) return null;
+      const pv = Number(row.pv_kwh || 0);
+      const load = Number(row.load_kwh || 0);
+      const surplus = pv - load;
+      const pvKwh = Math.max(0, Math.min(batteryKwh, surplus));
+      const gridKwh = batteryKwh - pvKwh;
+      return {
+        batteryKwh,
+        pvKwh,
+        gridKwh,
+        pvPct: (pvKwh / batteryKwh) * 100,
+        gridPct: (gridKwh / batteryKwh) * 100,
+      };
+    }
+
+    // Render the main state chip. A `split` state produces a dual-colour pill
+    // whose PV / grid shading is proportional to the battery charge source.
+    function renderStateChip(state) {
+      if (state.split) {
+        const pv = Math.max(0, Math.min(100, state.split.pvPct));
+        const grid = 100 - pv;
+        const gradient = `linear-gradient(90deg, var(--split-pv-color) 0 ${pv.toFixed(1)}%, var(--split-grid-color) ${pv.toFixed(1)}% 100%)`;
+        return `<span class="state-chip state-single state-split" style="background:${gradient}" title="${state.rule}">☀️ ${pv.toFixed(0)}% ⚡ ${grid.toFixed(0)}%</span>`;
+      }
+      return `<span class="state-chip state-single ${state.className}" title="${state.rule}">${state.emoji} ${state.label}</span>`;
     }
 
     rows.forEach((row) => {
@@ -684,7 +761,7 @@
         <td${tariffStyle(row.export_rate)}>${fmt.num(row.export_rate)}${currencyMinor}</td>
         <td>
           <div class="state-cell">
-            <span class="state-chip state-single ${state.className}" title="${state.rule}">${state.emoji} ${state.label}</span>
+            ${renderStateChip(state)}
             ${(state.extras || [])
               .map((extra) => `<span class="state-chip state-single ${extra.className}" title="${extra.rule}">${extra.emoji} ${extra.label}</span>`)
               .join("")}
