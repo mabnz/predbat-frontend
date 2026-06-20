@@ -530,7 +530,7 @@
         // gated on cost_change / gridImportKwh.
         const grid = gridImportKwh(row);
         const hasGridCost = Number.isFinite(costDelta) && costDelta >= 0.005;
-        const hasGridFlow = grid !== null && grid > 0.05;
+        const hasGridFlow = grid !== null && grid > 0.4;
         if (hasGridCost || hasGridFlow) {
           const cheapWindow = Number.isFinite(importRate) && Number.isFinite(lowImportRate) && importRate <= lowImportRate;
           return {
