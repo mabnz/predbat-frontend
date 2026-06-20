@@ -1,5 +1,5 @@
 # Predbat Frontend
-# Version: 0.6.0
+# Version: 0.6.1
 from __future__ import annotations
 
 import functools
@@ -17,7 +17,7 @@ from flask import Flask, jsonify, redirect, render_template, request, session, u
 
 load_dotenv()
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 
 PRED_BAT_PLAN_URL = os.getenv("PRED_BAT_PLAN_URL", "")
 PRED_BAT_PLAN_URLS = os.getenv("PRED_BAT_PLAN_URLS", "")
