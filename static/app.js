@@ -531,7 +531,9 @@
         const grid = gridImportKwh(row);
         const hasGridCost = Number.isFinite(costDelta) && costDelta >= 0.005;
         const hasGridFlow = grid !== null && grid > 0.4;
-        if (hasGridCost || hasGridFlow) {
+        // Gate the pill on actual grid import > 0.4 kWh. Only fall back to
+        // Predbat's cost signal when grid kWh can't be derived (grid === null).
+        if (hasGridFlow || (grid === null && hasGridCost)) {
           const cheapWindow = Number.isFinite(importRate) && Number.isFinite(lowImportRate) && importRate <= lowImportRate;
           return {
             label: "Grid Charge",
