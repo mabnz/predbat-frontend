@@ -309,48 +309,16 @@
       }
     }
 
-    // Pull today's already-incurred cost from the yesterdayData dataset.
-    // Predbat's "Yesterday" tab includes yesterday + today-so-far (up to "now").
-    let todaySpentSoFar = null;
-    const yesterdayDs = datasets.yesterday;
-    if (yesterdayDs && Array.isArray(yesterdayDs.rows) && rows.length) {
-      const planFirst = new Date(rows[0].time);
-      if (!Number.isNaN(planFirst.getTime())) {
-        const todayKey = planFirst.toDateString();
-        let todayStartTotal = null;
-        let todayEndTotal = null;
-        yesterdayDs.rows.forEach((r) => {
-          const total = Number(r.total_cost);
-          if (!Number.isFinite(total)) return;
-          const d = new Date(r.time);
-          if (Number.isNaN(d.getTime())) return;
-          if (d.toDateString() !== todayKey) return;
-          if (todayStartTotal === null) {
-            // First today row gives us the cumulative offset to subtract.
-            todayStartTotal = total;
-          }
-          todayEndTotal = total;
-        });
-        if (todayStartTotal !== null && todayEndTotal !== null) {
-          // total_cost is cumulative across the whole yesterdayData window,
-          // so the spend just for today = end - (start - first slot delta).
-          // Using inclusive endpoints: include the first today slot's cost too.
-          const firstTodayRow = yesterdayDs.rows.find((r) => {
-            const d = new Date(r.time);
-            return !Number.isNaN(d.getTime()) && d.toDateString() === todayKey;
-          });
-          const firstDelta = Number(firstTodayRow?.cost_change) || 0;
-          todaySpentSoFar = todayEndTotal - todayStartTotal + firstDelta;
-        }
-      }
-    }
-
     const cards = [];
-    if (todaySpentSoFar !== null) {
-      const totalTodayProjected = (todayCost ?? totalCost ?? 0) + todaySpentSoFar;
+    // Predbat's plan seeds today's opening slot with the cost already accrued
+    // since midnight, so `todayCost` (the last today slot's cumulative total)
+    // is already the full projected cost for today — no need to add the
+    // already-spent amount separately (doing so would double-count it).
+    const projectedToday = todayCost ?? totalCost ?? null;
+    if (projectedToday !== null) {
       cards.push({
         label: "Projected Cost Today",
-        value: fmt.money(totalTodayProjected, currencyMajor),
+        value: fmt.money(projectedToday, currencyMajor),
         type: "cost-today",
       });
     }
