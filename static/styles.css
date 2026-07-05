@@ -418,6 +418,10 @@ h1 {
   border-left-color: #007ea7;
   background: rgba(0, 126, 167, 0.07);
 }
+.card-pv-coverage {
+  border-left-color: #f2a900;
+  background: rgba(242, 169, 0, 0.07);
+}
 .card-default {
   border-left-color: var(--line);
 }

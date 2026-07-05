@@ -335,6 +335,20 @@
       type: "load",
     });
 
+    // Share of forecast load met by forecast PV generation. Capped at 100%
+    // since PV in excess of load is exported, not used to cover more load.
+    const pvKwh = Number(ds.totals?.pv_forecast);
+    const loadKwh = Number(ds.totals?.load_forecast);
+    if (Number.isFinite(pvKwh) && Number.isFinite(loadKwh) && loadKwh > 0) {
+      const coverage = Math.min(100, (pvKwh / loadKwh) * 100);
+      cards.push({
+        label: "PV Coverage",
+        subLabel: windowLabel,
+        value: `${fmt.num(coverage, 0)}%`,
+        type: "pv-coverage",
+      });
+    }
+
     summaryCardsEl.innerHTML = "";
 
     cards.forEach((card) => {
