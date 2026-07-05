@@ -720,6 +720,32 @@
       return `<span class="state-chip state-single ${state.className}" title="${state.rule}">${state.emoji} ${state.label}</span>`;
     }
 
+    // Predbat's `total_cost` is a cumulative running total that never resets
+    // across midnight. To make the Total Cost column reset at midnight, compute
+    // a per-day baseline (the cumulative total carried into a day) and subtract
+    // it. The first day in the dataset is special: it is the current, in-progress
+    // day, and Predbat already seeds its opening slot with the cost accrued since
+    // midnight (e.g. $4.06 at 07:15). So the first day keeps a baseline of 0 and
+    // is shown as-is; only later days (which begin at 00:00) are reset.
+    const dayBaselines = new Map();
+    let firstDayKey = null;
+    rows.forEach((r) => {
+      const total = Number(r.total_cost);
+      if (!Number.isFinite(total)) return;
+      const d = new Date(r.time);
+      if (Number.isNaN(d.getTime())) return;
+      const key = d.toDateString();
+      if (!dayBaselines.has(key)) {
+        if (firstDayKey === null) {
+          firstDayKey = key;
+          dayBaselines.set(key, 0);
+        } else {
+          const change = Number(r.cost_change) || 0;
+          dayBaselines.set(key, total - change);
+        }
+      }
+    });
+
     rows.forEach((row) => {
       const tr = document.createElement("tr");
       const state = classifyState(row);
@@ -755,6 +781,16 @@
         ? `<img class="grid-tower-icon" src="/static/img/transmission-tower.avif" alt="" title="Grid importing ${fmt.num(gridForIcon)} kWh">`
         : "";
 
+      // Reset the cumulative total at midnight by subtracting the day's baseline.
+      let dayTotalCost = null;
+      const totalCostRaw = Number(row.total_cost);
+      if (Number.isFinite(totalCostRaw)) {
+        const d = new Date(row.time);
+        const key = Number.isNaN(d.getTime()) ? null : d.toDateString();
+        const baseline = key !== null ? dayBaselines.get(key) : undefined;
+        dayTotalCost = baseline !== undefined ? totalCostRaw - baseline : totalCostRaw;
+      }
+
       tr.innerHTML = `
         <td>${row.time_label}</td>
         <td${tariffStyle(row.import_rate)}>${fmt.num(row.import_rate)}${currencyMinor}</td>
@@ -773,7 +809,7 @@
         <td>${fmt.num(row.load_kwh)} kWh</td>
         <td${socCellStyle}>${fmt.num(row.soc, 0)}%</td>
         <td class="grid-cost-cell"${gridCostStyle}>${gridChargeCell}</td>
-        <td>${fmt.money(row.total_cost, currencyMajor)}</td>
+        <td>${fmt.money(dayTotalCost, currencyMajor)}</td>
       `;
       planRowsEl.appendChild(tr);
     });
