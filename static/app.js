@@ -335,12 +335,12 @@
       type: "load",
     });
 
-    // Share of forecast load met by forecast PV generation. Capped at 100%
-    // since PV in excess of load is exported, not used to cover more load.
+    // Forecast PV generation as a percentage of forecast load. Values above
+    // 100% show how much surplus generation is available beyond forecast load.
     const pvKwh = Number(ds.totals?.pv_forecast);
     const loadKwh = Number(ds.totals?.load_forecast);
     if (Number.isFinite(pvKwh) && Number.isFinite(loadKwh) && loadKwh > 0) {
-      const coverage = Math.min(100, (pvKwh / loadKwh) * 100);
+      const coverage = (pvKwh / loadKwh) * 100;
       cards.push({
         label: "PV Coverage",
         subLabel: windowLabel,
