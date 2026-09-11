@@ -316,10 +316,12 @@
     // already-spent amount separately (doing so would double-count it).
     const projectedToday = todayCost ?? totalCost ?? null;
     if (projectedToday !== null) {
+      const isNegative = Number(projectedToday) < 0;
       cards.push({
         label: "Projected Cost Today",
-        value: fmt.money(projectedToday, currencyMajor),
+        value: `${fmt.money(projectedToday, currencyMajor)}${isNegative ? " 😎" : ""}`,
         type: "cost-today",
+        modifier: isNegative ? "negative" : "",
       });
     }
     cards.push({
@@ -353,7 +355,7 @@
 
     cards.forEach((card) => {
       const el = document.createElement("article");
-      el.className = `card card-${card.type || "default"}`;
+      el.className = `card card-${card.type || "default"}${card.modifier ? ` card-${card.modifier}` : ""}`;
       const sub = card.subLabel ? `<span class="card-sub">${card.subLabel}</span>` : "";
       el.innerHTML = `<h3>${card.label}${sub}</h3><p>${card.value}</p>`;
       summaryCardsEl.appendChild(el);

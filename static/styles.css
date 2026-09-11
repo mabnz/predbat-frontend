@@ -410,6 +410,10 @@ h1 {
   border-left-color: #bf0603;
   background: rgba(191, 6, 3, 0.07);
 }
+.card-negative {
+  border-left-color: #157f1f;
+  background: rgba(21, 127, 31, 0.12);
+}
 .card-pv {
   border-left-color: #157f1f;
   background: rgba(21, 127, 31, 0.07);
