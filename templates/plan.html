@@ -30,7 +30,10 @@
       <header class="hero">
         <div class="hero-eyebrow">
           <p class="eyebrow">Predbat Planner</p>
-          <p class="eyebrow eyebrow-version">v{{ version }}</p>
+          <div class="hero-links">
+            <p class="eyebrow eyebrow-version">v{{ version }}</p>
+            <a href="/config/" class="hero-config">Config</a>
+          </div>
         </div>
         <div class="hero-status">
           <span id="refreshStatus" class="status-badge status-ok">Live</span>
@@ -43,7 +46,6 @@
           </div>
         {% endif %}
         <h1>Dashboard</h1>
-        <p class="subtitle">Your battery, solar, and grid activity in one place.</p>
       </header>
 
       {% if error %}

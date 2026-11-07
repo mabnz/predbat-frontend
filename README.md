@@ -11,6 +11,7 @@ I wasn't super happy with the UX [Predbat](https://github.com/springfall2008/bat
 ## What It Includes
 
 - Single-page dashboard for Predbat plan data
+- Config link to `/config/` beneath the version number in the top-right header
 - Tabs for available datasets from the `/plan` page:
   - Plan
   - Yesterday

@@ -147,6 +147,17 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.hero-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.hero-config {
+  font-size: 11px;
+}
+
 .hero-status {
   display: flex;
   justify-content: flex-end;
@@ -167,13 +178,15 @@ body {
   color: var(--muted);
 }
 
-.hero-user-logout {
+.hero-user-logout,
+.hero-config {
   color: var(--accent-two);
   text-decoration: none;
   font-weight: 600;
 }
 
-.hero-user-logout:hover {
+.hero-user-logout:hover,
+.hero-config:hover {
   text-decoration: underline;
 }
 
